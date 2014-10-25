@@ -37,3 +37,59 @@ void reg_test() {
 	assert(sample[R_ESI] == cpu.esi);
 	assert(sample[R_EDI] == cpu.edi);
 }
+
+void set_PF(int r){
+	int count = 0, i;
+	for(i = 0;i < 8;i++)
+	{
+		count += r % 2;
+		r >>= 1;
+	}
+	if(count % 2 == 0)
+		cpu.PF = 1;
+	else
+		cpu.PF = 0;
+}
+
+void set_SF(unsigned r){
+	cpu.SF = r >> 31;
+}
+
+void set_ZF(int r){
+	cpu.ZF = (r == 0) ? 1 : 0;
+}
+
+void set_CF(unsigned sec,unsigned fir,bool mark){
+	if(mark){
+		if(fir > fir+sec) cpu.CF = 1;
+		else cpu.CF = 0;
+	}
+	else{
+		if(fir < sec) cpu.CF = 1;
+		else cpu.CF = 0;
+	}
+}
+
+void set_AF(unsigned sec,unsigned fir,bool mark){
+	unsigned fl4 = fir & 0xf;
+	unsigned sl4 = sec & 0xf;
+	if(mark){
+		unsigned temp = fl4 + sl4;
+		if(temp >> 4) cpu.AF = 1;
+		else cpu.AF = 0;
+	}
+	else{
+		if(fl4 < sl4) cpu.AF = 1;
+		else cpu.AF = 0;
+	}
+}
+
+void set_OF(int sec,int fir,bool mark){
+	if(!mark)
+		sec = ~sec + 1;
+	if(fir > 0 && sec > 0 && fir + sec < 0)
+		cpu.OF = 1;
+	else if(fir < 0 && sec < 0 && fir + sec > 0)
+		cpu.OF = 1;
+	else cpu.OF = 0;
+}

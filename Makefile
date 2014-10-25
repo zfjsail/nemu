@@ -15,25 +15,23 @@ CFILES  = $(shell find src/ -name "*.c")
 OBJS    = $(CFILES:.c=.o)
 
 # test files
-TESTFILE = testcase/asm/mov
+TESTFILE = testcase/c/mov-c
 C_TEST_FILE_LIST = $(shell find testcase/c/ -name "*.c")
 S_TEST_FILE_LIST = $(shell find testcase/asm/ -name "*.S")
 TEST_FILE_LIST = $(C_TEST_FILE_LIST:.c=) $(S_TEST_FILE_LIST:.S=)
 
 nemu: $(OBJS)
 	$(CC) -o nemu $(OBJS) $(CFLAGS) -lreadline
-	-@git add -A --ignore-errors &> /dev/null # KEEP IT
+	-@git add -A --ignore-errors # KEEP IT
 	-@while (test -e .git/index.lock); do sleep 0.1; done # KEEP IT
 	-@(echo "> compile" && uname -a && uptime && pstree -A) | git commit -F - $(GITFLAGS) # KEEP IT
 
 $(TEST_FILE_LIST):
 	cd `dirname $@` && make
 
-loader: src/elf/loader.c
-
-src/elf/loader.c: $(TESTFILE)
-	objcopy -S -O binary -j .text $(TESTFILE) loader
-	xxd -i loader > $@
+loader: $(TESTFILE)
+	objcopy -S -O binary $(TESTFILE) loader
+	xxd -i loader > src/elf/loader.c
 	rm loader
 
 
@@ -48,7 +46,7 @@ test: nemu $(TEST_FILE_LIST)
 
 
 STU_ID=131220160
-SHARED_FOLDER=~/mnt
+SHARED_FOLDER=/mnt
 
 submit: clean
 	cd testcase && make clean

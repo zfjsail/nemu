@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
 	init_bp_pool();
 	load_table();
 
-
 	/* Test whether the 'CPU_state' structure is organized correctly. */
 	reg_test();
 

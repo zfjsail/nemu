@@ -16,11 +16,14 @@ make_helper(inv) {
 	assert(0);
 }
 
+bool isBreak = false;//触发断点的标志
+
 make_helper(int3) {
 	/* A breakpoint is hit! Do something here! */
-	assert(0);
+	isBreak = true;//即将触发断点！
+	printf("A breakpoint is hit!\n");
 
-	return 1;
+	return 1;//指令长度噢
 }
 
 make_helper(nemu_trap) {
