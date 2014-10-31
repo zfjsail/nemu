@@ -3,9 +3,11 @@
 //
 //mov-c
 //sum
+//prime
+//fib
 
 helper_fun opcode_table [256] = {
-/* 0x00 */	inv, add_r2m_l/we, inv, inv, 
+/* 0x00 */	inv, add_r2rm_l/we, inv, inv, 
 /* 0x04 */	inv, inv, inv, inv, 
 /* 0x08 */	inv, inv, inv, inv, 
 /* 0x0c */	inv, inv, inv, inv, 
@@ -19,15 +21,14 @@ helper_fun opcode_table [256] = {
 /* 0x2c */	inv, inv, inv, inv, 
 /* 0x30 */	inv, inv, inv, inv, 
 /* 0x34 */	inv, inv, inv, inv,
-/* 0x38 */	inv, inv, inv, inv, 
+/* 0x38 */	inv, cmp_r2r_l/we, inv, inv, 
 /* 0x3c */	inv, inv, cmp_r&m_l, inv, 
 /* 0x40 */	inv, inv, inv, inv, 
 /* 0x44 */	inv, inv, inv, inv,
 /* 0x48 */	inv, inv, inv, inv, 
 /* 0x4c */	inv, inv, inv, inv, 
 /* 0x50 */	inv, inv, inv, inv, 
-  9   100024:   7e f0                                 jle 0x│ 32 /* 0x6c */  inv, inv, inv, inv,
-  /* 0x54 */	inv, push_bp_l(只实现了ebp/we), inv, inv,
+/* 0x54 */	inv, push_bp_l(只实现了ebp/we), inv, inv,
 /* 0x58 */	inv, inv, inv, inv, 
 /* 0x5c */	inv, inv, inv, inv, 
 /* 0x60 */	inv, inv, inv, inv,

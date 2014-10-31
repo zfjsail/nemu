@@ -4,8 +4,9 @@
 make_helper(aos_imm8_l);//add or sub
 make_helper(cmp_i2m_l);
 make_helper(cmp_m2r_l);
+make_helper(cmp_r2r_l);
 
-make_helper(add_r2m_l);
+make_helper(add_rm2m_l);
 
 make_helper(idiv_m_l);
 

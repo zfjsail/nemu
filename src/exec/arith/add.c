@@ -1,7 +1,7 @@
 #include "exec/helper.h"
 #include "cpu/modrm.h"
 
-make_helper(add_r2m_l){
+make_helper(add_rm2m_l){
 	ModR_M m;
 	int temp;
 	m.val = instr_fetch(eip+1,1);
@@ -18,6 +18,14 @@ make_helper(add_r2m_l){
 		else
 			print_asm("add" " %%%s,-0x%x(%%%s)",regsl[m.reg],-disp8,regsl[m.R_M]);
 		return 3;
+	}
+	else if(m.mod == 3){
+		int add_1 = reg_l(m.R_M);
+		add_2 = reg_l(m.reg);
+		reg_l(m.R_M) = add_1 + add_2;
+		set_6F(add_2,add_1,reg_l(m.R_M),1);
+		print_asm("add" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
+		return 2;
 	}
 	else return 0;//inv
 }
