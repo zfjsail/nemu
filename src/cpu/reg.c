@@ -93,3 +93,18 @@ void set_OF(int sec,int fir,bool mark){
 		cpu.OF = 1;
 	else cpu.OF = 0;
 }
+
+void set_6F(int sec,int fir,int temp,bool mark){
+	set_OF(sec,fir,mark);
+	set_SF(temp);
+    set_ZF(temp);
+    set_AF(sec,fir,mark);
+	set_PF(temp);
+	set_CF(sec,fir,mark);
+}
+
+void set_rF(int r){//只传递结果
+	set_SF(r);
+	set_ZF(r);
+	set_PF(r);
+}

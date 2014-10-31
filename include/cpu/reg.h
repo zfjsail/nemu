@@ -58,4 +58,8 @@ void set_CF(unsigned sec,unsigned fir,bool mark);
 void set_AF(unsigned sec,unsigned fir,bool mark);
 void set_OF(int sec,int fir,bool mark);
 
+//mark = 0为减法
+void set_6F(int sec,int fir,int temp,bool mark);//set OSZAPC F 
+void set_rF(int r);//只传递结果
+
 #endif

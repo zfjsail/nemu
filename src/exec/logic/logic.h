@@ -3,4 +3,6 @@
 
 make_helper(test_r_l);
 
+make_helper(sar_rl_b);
+
 #endif
