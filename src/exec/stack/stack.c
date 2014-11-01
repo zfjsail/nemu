@@ -1,16 +1,21 @@
 #include "exec/helper.h"
+#include "cpu/modrm.h"
 
-make_helper(push_bp_l){
+make_helper(push_r_l){
 	cpu.esp -= 4;
-	swaddr_write(cpu.esp,4,cpu.ebp);
-	print_asm("push" " %%ebp");
+	ModR_M m;
+	m.val = instr_fetch(eip,1);
+	swaddr_write(cpu.esp,4,reg_l(m.R_M));
+	print_asm("push" " %%%s",regsl[m.R_M]);
 	return 1;
 }
 
-make_helper(push_bx_l){
-	cpu.esp -= 4;
-	swaddr_write(cpu.esp,4,cpu.ebx);
-	print_asm("push" " %%ebx");
+make_helper(pop_r_l){
+	ModR_M m;
+	m.val = instr_fetch(eip,1);
+	reg_l(m.R_M) = swaddr_read(cpu.esp,4);
+	cpu.esp += 4;
+	print_asm("pop" " %%%s",regsl[m.R_M]);
 	return 1;
 }
 

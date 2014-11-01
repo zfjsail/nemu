@@ -61,8 +61,10 @@ void set_ZF(int r){
 
 void set_CF(unsigned sec,unsigned fir,bool mark){
 	if(mark){
-		if(fir > fir+sec) cpu.CF = 1;
-		else cpu.CF = 0;
+		if(fir + sec >= fir)
+			cpu.CF = 0;
+		else
+			cpu.CF = 1;
 	}
 	else{
 		if(fir < sec) cpu.CF = 1;

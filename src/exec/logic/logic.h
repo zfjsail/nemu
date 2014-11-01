@@ -8,4 +8,8 @@ make_helper(sft_rl_b);
 
 make_helper(setne);
 
+make_helper(xor_r_l);
+
+make_helper(or_r_l);
+
 #endif

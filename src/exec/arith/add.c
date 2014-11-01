@@ -21,7 +21,6 @@ make_helper(add_rm2m_l){
 	}
 	else if(m.mod == 3){
 		int add_1 = reg_l(m.R_M);
-		add_2 = reg_l(m.reg);
 		reg_l(m.R_M) = add_1 + add_2;
 		set_6F(add_2,add_1,reg_l(m.R_M),1);
 		print_asm("add" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
@@ -40,3 +39,19 @@ make_helper(add_i2a_l){
 	return 5;
 }
 
+make_helper(adc_r2r_l){
+	ModR_M m;
+	m.val = instr_fetch(eip+1,1);
+	int add_3 = 0;
+	if(cpu.CF == -1)
+		add_3 = 1;
+	int add_2 = reg_l(m.reg) + add_3;
+	if(m.mod == 3){
+		int add_1 = reg_l(m.R_M);
+		reg_l(m.R_M) = add_1 + add_2;
+		set_6F(add_2,add_1,reg_l(m.R_M),1);
+		print_asm("adc" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
+		return 2;
+	}
+	else return 0;//inv
+}
