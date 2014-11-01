@@ -13,10 +13,10 @@ make_helper(idiv_m_l){
 		temp = fir / sec;
 		cpu.eax = temp;
 		cpu.edx = fir % sec;
-		if(disp8 >= 0)
-			print_asm("idiv" " 0x%x(%%%s)",disp8,regsl[m.R_M]);
-		else
-			print_asm("idiv" " -0x%x(%%%s)",-disp8,regsl[m.R_M]);
+//		if(disp8 >= 0)
+//			print_asm("idiv" " 0x%x(%%%s)",disp8,regsl[m.R_M]);
+//		else
+//			print_asm("idiv" " -0x%x(%%%s)",-disp8,regsl[m.R_M]);
 		return 3;
 	}
 	else return 0;//inv

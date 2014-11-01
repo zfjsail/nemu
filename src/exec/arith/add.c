@@ -13,10 +13,10 @@ make_helper(add_rm2m_l){
 		temp = add_1 + add_2;
 		swaddr_write(R_M+disp8,4,temp);
 		set_6F(add_2,add_1,temp,1);
-		if(disp8 >= 0)
-			print_asm("add" " %%%s,0x%x(%%%s)",regsl[m.reg],disp8,regsl[m.R_M]);
-		else
-			print_asm("add" " %%%s,-0x%x(%%%s)",regsl[m.reg],-disp8,regsl[m.R_M]);
+//		if(disp8 >= 0)
+//			print_asm("add" " %%%s,0x%x(%%%s)",regsl[m.reg],disp8,regsl[m.R_M]);
+//		else
+//			print_asm("add" " %%%s,-0x%x(%%%s)",regsl[m.reg],-disp8,regsl[m.R_M]);
 		return 3;
 	}
 	else if(m.mod == 3){
@@ -24,8 +24,19 @@ make_helper(add_rm2m_l){
 		add_2 = reg_l(m.reg);
 		reg_l(m.R_M) = add_1 + add_2;
 		set_6F(add_2,add_1,reg_l(m.R_M),1);
-		print_asm("add" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
+//		print_asm("add" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
 		return 2;
 	}
 	else return 0;//inv
 }
+
+make_helper(add_i2a_l){
+	int add_2 = instr_fetch(eip+1,4);
+	int add_1 = cpu.eax;
+	int temp = add_1 + add_2;
+	cpu.eax = temp;
+	set_6F(add_2,add_1,temp,1);
+//	print_asm("add" " $0x%x,%%eax",add_2);
+	return 5;
+}
+

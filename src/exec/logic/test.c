@@ -13,7 +13,7 @@ make_helper(test_r_l){
 	    set_SF(temp);
 	    set_ZF(temp);	
 		set_PF(temp & 0xff);
-		print_asm("test" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
+//		print_asm("test" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
 		return 2;
 	}
 	else

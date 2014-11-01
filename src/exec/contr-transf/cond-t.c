@@ -5,7 +5,7 @@ make_helper(jmp_e_b){
 	    int imm;
 	    imm = (char)instr_fetch(eip+1,1);
 		cpu.eip += imm;
-		print_asm("je" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
+//		print_asm("je" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
 	}
 	return 2;
 }
@@ -15,7 +15,7 @@ make_helper(jle_b){
 		int imm;
 		imm = (char)instr_fetch(eip+1,1);
 		cpu.eip += imm;
-		print_asm("jle" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
+//		print_asm("jle" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
 	}
 	return 2;
 }
@@ -25,7 +25,7 @@ make_helper(jl_b){
 		int imm;
 		imm = (char)instr_fetch(eip+1,1);
 		cpu.eip += imm;
-		print_asm("jl" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
+//		print_asm("jl" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
 	}
 	return 2;
 }
@@ -35,7 +35,7 @@ make_helper(jne_b){
 		int imm;
 		imm = (char)instr_fetch(eip+1,1);
 		cpu.eip += imm;
-		print_asm("jne" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
+//		print_asm("jne" " 0x%x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
 	}
 	return 2;
 }
