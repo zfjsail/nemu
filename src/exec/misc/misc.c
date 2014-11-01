@@ -42,19 +42,19 @@ make_helper(lea_m2r_l){
 	if(m.mod == 1){
 	    int disp8 = (char)instr_fetch(eip+2,1);
 		reg_l(m.reg) = bx + disp8;
-//		if(disp8 >= 0)
-//			print_asm("lea" " 0x%x(%%%s),%%%s",disp8,regsl[m.R_M],regsl[m.reg]);
-//		else
-//			print_asm("lea" " -0x%x(%%%s),%%%s",-disp8,regsl[m.R_M],regsl[m.reg]);
+		if(disp8 >= 0)
+			print_asm("lea" " 0x%x(%%%s),%%%s",disp8,regsl[m.R_M],regsl[m.reg]);
+		else
+			print_asm("lea" " -0x%x(%%%s),%%%s",-disp8,regsl[m.R_M],regsl[m.reg]);
 		return 3;
 	}
 	else if(m.mod == 2){
 		int disp32 = instr_fetch(eip+2,4);
 		reg_l(m.reg) = bx + disp32;
-//		if(disp32 >= 0)
-//			print_asm("lea" " 0x%x(%%%s),%%%s",disp32,regsl[m.R_M],regsl[m.reg]);
-//		else
-//			print_asm("lea" " -0x%x(%%%s),%%%s",-disp32,regsl[m.R_M],regsl[m.reg]);
+		if(disp32 >= 0)
+			print_asm("lea" " 0x%x(%%%s),%%%s",disp32,regsl[m.R_M],regsl[m.reg]);
+		else
+			print_asm("lea" " -0x%x(%%%s),%%%s",-disp32,regsl[m.R_M],regsl[m.reg]);
 		return 6;
 	}
 	else return 0;//inv

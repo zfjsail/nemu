@@ -2,7 +2,10 @@
 #define __LOGIC_H__
 
 make_helper(test_r_l);
+make_helper(test_r2r_b);
 
 make_helper(sft_rl_b);
+
+make_helper(setne);
 
 #endif
