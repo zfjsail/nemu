@@ -7,12 +7,13 @@
 //fib
 //wanshu
 //pascal
+//matrix-mul
 
 helper_fun opcode_table [256] = {
 /* 0x00 */	inv, add_r2rm_l/we, inv, inv, 
 /* 0x04 */	inv, add_i32_to_a/we, inv, inv, 
 /* 0x08 */	inv, inv, inv, inv, 
-/* 0x0c */	inv, inv, inv, inv, 
+/* 0x0c */	inv, inv, inv, op_plus_l((8e jle_i32)/we, (af imul r_r_l)/we)
 /* 0x10 */	inv, inv, inv, inv, 
 /* 0x14 */	inv, inv, inv, inv, 
 /* 0x18 */	inv, inv, inv, inv, 
@@ -29,13 +30,13 @@ helper_fun opcode_table [256] = {
 /* 0x44 */	inv, inv, inv, inv,
 /* 0x48 */	inv, inv, inv, inv, 
 /* 0x4c */	inv, inv, inv, inv, 
-/* 0x50 */	inv, inv, inv, inv, 
+/* 0x50 */	inv, inv, inv, push_bx_l/we, 
 /* 0x54 */	inv, push_bp_l(只实现了ebp/we), inv, inv,
 /* 0x58 */	inv, inv, inv, inv, 
 /* 0x5c */	inv, inv, inv, inv, 
 /* 0x60 */	inv, inv, inv, inv,
 /* 0x64 */	inv, inv, data_size, inv,
-/* 0x68 */	inv, inv, inv, inv, 
+/* 0x68 */	inv, inv, inv, imul_ibr2r_l/we, 
 /* 0x6c */	inv, inv, inv, inv, 
 /* 0x70 */	inv, inv, inv, inv,
 /* 0x74 */	jmp_e_b(je imm8/we), jne_b/we, inv, inv,
@@ -67,7 +68,7 @@ helper_fun opcode_table [256] = {
 /* 0xdc */	inv, inv, inv, inv,
 /* 0xe0 */	inv, inv, inv, inv,
 /* 0xe4 */	inv, inv, inv, inv,
-/* 0xe8 */	inv, inv, inv, inv,
+/* 0xe8 */	inv, jmp_l/we, inv, inv,
 /* 0xec */	inv, inv, jmp_b/we, inv,
 /* 0xf0 */	inv, inv, inv, inv,
 /* 0xf4 */	inv, inv, inv, inv,

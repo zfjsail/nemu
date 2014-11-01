@@ -10,6 +10,8 @@ make_helper(sub_r2r_l);
 make_helper(add_rm2m_l);
 make_helper(add_i2a_l);
 
+make_helper(imul_ibr2r_l);
+
 make_helper(idiv_m_l);
 
 #endif
