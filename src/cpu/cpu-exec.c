@@ -78,13 +78,14 @@ void cpu_exec(volatile uint32_t n) {
 			while(current -> addr != cpu.eip)//找存放相应内存地址的断点结构
 				current = current -> next;
 			swaddr_write(cpu.eip,1,current -> sav_istr);//临时恢复原来的指令
+			eip_temp--;
 		}
 		int instr_len = exec(cpu.eip);
 
 		/*刚执行完恢复的指令要马上设置回断点，使其能反复触发*/
-		if(isBreak == true && swaddr_read(cpu.eip,1) != INT3_CODE)//刚触发断点但断点的位置刚被恢复为原指令
+		if(isBreak == true && swaddr_read(eip_temp,1) != INT3_CODE)//刚触发断点但断点的位置刚被恢复为原指令
 		{
-		    swaddr_write(cpu.eip,1,INT3_CODE);
+		    swaddr_write(eip_temp,1,INT3_CODE);
 			isBreak = false;//告别刚刚触发的那个断点，初始化isBreak，否则执行下一条正常指令也会进入这个判断
 		}
 

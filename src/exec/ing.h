@@ -10,6 +10,7 @@
 //matrix-mul
 //add
 //add-longlong
+//min3
 
 helper_fun opcode_table [256] = {
 /* 0x00 */	inv, add_r2rm_l/we, inv, inv, 
@@ -43,7 +44,7 @@ helper_fun opcode_table [256] = {
 /* 0x70 */	inv, inv, inv, inv,
 /* 0x74 */	jmp_e_b(je imm8/we), jne_b/we, jbe_b/we, inv,
 /* 0x78 */	inv, inv, inv, inv, 
-/* 0x7c */	jl_i8/we, inv, jle_i8/we, inv, 
+/* 0x7c */	jl_i8/we, jge_i8/we, jle_i8/we, inv, 
 /* 0x80 */	inv, cmp_il 2 ml, nemu_trap, cmp_imm8_l(32位寄存器和8位立即数比/we), sub i8 to r_l/we cmpl i8 to m_l addl i8 to m_l/we  and_i8_rl/we add_i8_rl/we addl_modrm_sib_disp8_imm8/we
 /* 0x84 */	test_rr_b/we, test_r_l(test r32,r32/we), inv, inv, 
 /* 0x88 */	mov_r2rm_b, mov_r2rm_v, mov_rm2r_b, mov_rm2r_v,
