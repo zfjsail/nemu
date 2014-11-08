@@ -39,23 +39,59 @@ make_helper(lea_m2r_l){
 	ModR_M m;
 	m.val = instr_fetch(eip+1,1);
 	int bx = reg_l(m.R_M);
-	if(m.mod == 1){
-	    int disp8 = (char)instr_fetch(eip+2,1);
-		reg_l(m.reg) = bx + disp8;
-		if(disp8 >= 0)
-			print_asm("lea" " 0x%x(%%%s),%%%s",disp8,regsl[m.R_M],regsl[m.reg]);
-		else
-			print_asm("lea" " -0x%x(%%%s),%%%s",-disp8,regsl[m.R_M],regsl[m.reg]);
-		return 3;
+	if(m.R_M != 4){
+		if(m.mod == 1){
+			int disp8 = (char)instr_fetch(eip+2,1);
+		    reg_l(m.reg) = bx + disp8;
+		    if(disp8 >= 0)
+				print_asm("lea" " 0x%x(%%%s),%%%s",disp8,regsl[m.R_M],regsl[m.reg]);
+		    else
+			    print_asm("lea" " -0x%x(%%%s),%%%s",-disp8,regsl[m.R_M],regsl[m.reg]);
+		    return 3;
+	    }
+	    else if(m.mod == 2){
+		    int disp32 = instr_fetch(eip+2,4);
+		    reg_l(m.reg) = bx + disp32;
+		    if(disp32 >= 0)
+			    print_asm("lea" " 0x%x(%%%s),%%%s",disp32,regsl[m.R_M],regsl[m.reg]);
+		    else
+			    print_asm("lea" " -0x%x(%%%s),%%%s",-disp32,regsl[m.R_M],regsl[m.reg]);
+		    return 6;
+	    }    
+	    else return 0;//inv
 	}
-	else if(m.mod == 2){
-		int disp32 = instr_fetch(eip+2,4);
-		reg_l(m.reg) = bx + disp32;
-		if(disp32 >= 0)
-			print_asm("lea" " 0x%x(%%%s),%%%s",disp32,regsl[m.R_M],regsl[m.reg]);
-		else
-			print_asm("lea" " -0x%x(%%%s),%%%s",-disp32,regsl[m.R_M],regsl[m.reg]);
-		return 6;
+	else{
+		ModR_M mm;
+		int ss = 0;
+		mm.val = instr_fetch(eip+2,1);
+		if(m.mod == 0 && mm.R_M == 5){
+			int bx = 0;
+			int disp32= instr_fetch(eip+3,4);
+	        int index = mm.reg;
+			int add_temp;
+			if(index == 4)
+				add_temp = 0;
+			else{
+				switch(mm.mod){
+					case 0: ss = 1;break;
+					case 1: ss = 2;break;
+					case 2: ss = 4;break;
+					case 3: ss = 8;break;
+				}
+				add_temp = index * ss;
+			}
+			int addr = disp32 + bx + add_temp;
+			reg_l(m.reg) = addr;
+			if(disp32 >= 0)
+				print_asm("lea" " 0x%x(,%%%s,%d),%%%s",disp32,regsl[mm.reg],ss,regsl[m.reg]);
+			else
+				print_asm("lea" " -0x%x(,%%%s,%d),%%%s",-disp32,regsl[mm.reg],ss,regsl[m.reg]);
+			return 7;
+		}
+		else return 0;//inv
 	}
-	else return 0;//inv
+}
+
+make_helper(nop){
+	return 1;
 }

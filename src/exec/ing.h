@@ -3,6 +3,7 @@
 //
 //add
 //add-longlong
+//bubble-sort
 //fact
 //fib
 //gotbaha
@@ -14,7 +15,11 @@
 //mov-c
 //pascal
 //prime
+//select-sort
+//shuixianhua
+//struct delay
 //sum
+//switch
 //to-lower-case
 //wanshu
 
@@ -29,7 +34,7 @@ helper_fun opcode_table [256] = {
 /* 0x1c */	inv, inv, inv, inv, 
 /* 0x20 */	inv, inv, inv, inv, 
 /* 0x24 */	inv, inv, inv, inv,
-/* 0x28 */	inv, sub_r2r_l/we, inv, inv, 
+/* 0x28 */	inv, sub_r2r_l/we, inv, sub_r2m_l/we, 
 /* 0x2c */	inv, inv, inv, inv, 
 /* 0x30 */	inv, xor_r2r_l/we, inv, inv, 
 /* 0x34 */	inv, inv, inv, inv,
@@ -48,7 +53,7 @@ helper_fun opcode_table [256] = {
 /* 0x68 */	inv, imul_ilr2r_l/we, inv, imul_ibr2r_l/we, 
 /* 0x6c */	inv, inv, inv, inv, 
 /* 0x70 */	inv, inv, inv, inv,
-/* 0x74 */	jmp_e_b(je imm8/we), jne_b/we, jbe_b/we, inv,
+/* 0x74 */	jmp_e_b(je imm8/we), jne_b/we, jbe_b/we, ja_b/we,
 /* 0x78 */	inv, inv, inv, inv, 
 /* 0x7c */	jl_i8/we, jge_i8/we, jle_i8/we, jg_b/we, 
 /* 0x80 */	cmp_i2m_b/we, cmp_add_l/we, nemu_trap, cmp_imm8_l(32位寄存器和8位立即数比/we), sub i8 to r_l/we cmpl i8 to m_l addl i8 to m_l/we  and_i8_rl/we add_i8_rl/we addl_modrm_sib_disp8_imm8/we
@@ -82,7 +87,7 @@ helper_fun opcode_table [256] = {
 /* 0xf0 */	inv, inv, inv, inv,
 /* 0xf4 */	inv, inv, inv, imd_l//* & /,
 /* 0xf8 */	inv, inv, idiv_m_l/we, inv,
-/* 0xfc */	inv, inv, inv, inv
+/* 0xfc */	inv, inv, inv, jmp_nr_l/we
 };
 
 make_fun op_plus_table[256] = {
@@ -128,7 +133,7 @@ make_fun op_plus_table[256] = {
 /* 0xa0 */	inv, inv, inv, inv, 
 /* 0xa4 */	inv, inv, inv, inv,
 /* 0xa8 */	inv, inv, inv, inv,
-/* 0xac */	inv, inv, inv, imul_rr_l/we,
+/* 0xac */	inv, inv, inv, imul_rmr_l/we,
 /* 0xb0 */	inv, inv, inv, inv,
 /* 0xb4 */	inv, inv, mov_z_bl/we, inv,
 /* 0xb8 */	inv, inv, inv, inv,

@@ -20,10 +20,27 @@ make_helper(imul_ibr2r_l){
 	else return 0;//inv
 }
 
-make_helper(imul_r2r_l){
+make_helper(imul_rm2r_l){
     ModR_M mm;
     mm.val = instr_fetch(eip+2,1);
-    if(mm.mod == 3){
+	if(mm.mod == 1){
+		int bx = reg_l(mm.R_M);
+		int disp8 = (char)instr_fetch(eip+3,1);
+		long long fir = (int)reg_l(mm.reg);
+		long long sec = (int)swaddr_read(bx+disp8,4);
+		int temp = fir * sec;
+		reg_l(mm.reg) = temp;
+		if(fir * sec == temp){
+			cpu.CF = 0;
+			cpu.OF = 0;
+		}
+		if(disp8 >= 0)
+			print_asm("imul" " 0x%x(%%%s),%%%s",disp8,regsl[mm.R_M],regsl[mm.reg]);
+		else
+			print_asm("imul" " -0x%x(%%%s),%%%s",-disp8,regsl[mm.R_M],regsl[mm.reg]);
+		return 4;
+	}
+	else if(mm.mod == 3){
 	    long long fir = (int)reg_l(mm.reg);
 	    long long sec = (int)reg_l(mm.R_M);
 	    int temp = fir * sec;
