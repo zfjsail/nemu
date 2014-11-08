@@ -25,6 +25,7 @@ make_helper(mis_imm8_l){
 			temp = fir & sec;
 			cpu.CF = 0;
 			cpu.OF = 0;
+			reg_l(m.R_M) = temp;
 		    set_rF(temp);
 			print_asm("and" " $0x%x,%%%s",sec,regsl[m.R_M]);
 			return 3;

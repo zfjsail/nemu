@@ -41,3 +41,38 @@ make_helper(mov_moffs2a_v) {
 	return (suffix == 'l' ? mov_moffs2a_l(eip) : mov_moffs2a_w(eip));
 }
 
+make_helper(mov_s_bl){
+	ModR_M mm;
+	mm.val = instr_fetch(eip+2,1);
+	if(mm.mod == 3){
+		reg_l(mm.reg) = (char)reg_b(mm.R_M);
+		print_asm("movsbl" " %%%s,%%%s",regsb[mm.R_M],regsl[mm.reg]);
+		return 3;
+	}
+	else return 0;//inv
+}
+
+make_helper(mov_z_bl){
+	ModR_M mm;
+	mm.val = instr_fetch(eip+2,1);
+	if(mm.mod == 1){
+		int bx = reg_l(mm.R_M);
+		int disp8 = (char)instr_fetch(eip+3,1);
+		reg_l(mm.reg) = swaddr_read(bx+disp8,1);
+		if(disp8 >= 0)
+			print_asm("movzbl" " 0x%x(%%%s),%%%s",disp8,regsl[mm.R_M],regsl[mm.reg]);
+		else
+			print_asm("movzbl" " -0x%x(%%%s),%%%s",-disp8,regsl[mm.R_M],regsl[mm.reg]);
+		return 4;
+	}
+	else if(mm.mod == 0){
+		int bx = reg_l(mm.R_M);
+		reg_l(mm.reg) = swaddr_read(bx,1);
+		print_asm("movzbl" " (%%%s),%%%s",regsl[mm.R_M],regsl[mm.reg]);
+		return 3;
+	}
+	else return 0;//inv
+}
+
+
+		

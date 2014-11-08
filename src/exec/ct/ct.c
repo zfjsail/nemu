@@ -54,10 +54,19 @@ make_helper(jbe_b){
 make_helper(jge_b){
 	if(cpu.SF == cpu.OF){
 		int imm;
-			printf("%x\n",cpu.eip);
 		imm = (char)instr_fetch(eip+1,1);
 		cpu.eip += imm;
 		print_asm("jge" " %x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
+	}
+	return 2;
+}
+
+make_helper(jg_b){
+	if(!cpu.ZF && cpu.SF == cpu.OF){
+		int imm;
+		imm = (char)instr_fetch(eip+1,1);
+		cpu.eip += imm;
+		print_asm("jg" " %x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
 	}
 	return 2;
 }

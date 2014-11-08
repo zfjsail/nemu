@@ -1,16 +1,22 @@
 //w：have been written
 //e: have benn execute
 //
-//mov-c
-//sum
-//prime
-//fib
-//wanshu
-//pascal
-//matrix-mul
 //add
 //add-longlong
+//fact
+//fib
+//gotbaha
+//if-else
+//leap-year
+//max
 //min3
+//matrix-mul
+//mov-c
+//pascal
+//prime
+//sum
+//to-lower-case
+//wanshu
 
 helper_fun opcode_table [256] = {
 /* 0x00 */	inv, add_r2rm_l/we, inv, inv, 
@@ -27,7 +33,7 @@ helper_fun opcode_table [256] = {
 /* 0x2c */	inv, inv, inv, inv, 
 /* 0x30 */	inv, xor_r2r_l/we, inv, inv, 
 /* 0x34 */	inv, inv, inv, inv,
-/* 0x38 */	inv, cmp_r2r_l/we, inv, inv, 
+/* 0x38 */	cmp_r2r_b/we, cmp_r2r_l/we, inv, inv, 
 /* 0x3c */	inv, inv, cmp_r&m_l, inv, 
 /* 0x40 */	inv, inv, inv, inv, 
 /* 0x44 */	inv, inv, inv, inv,
@@ -39,13 +45,13 @@ helper_fun opcode_table [256] = {
 /* 0x5c */	inv, inv, inv, inv, //pop_r_l/应该没问题
 /* 0x60 */	inv, inv, inv, inv,
 /* 0x64 */	inv, inv, data_size, inv,
-/* 0x68 */	inv, inv, inv, imul_ibr2r_l/we, 
+/* 0x68 */	inv, imul_ilr2r_l/we, inv, imul_ibr2r_l/we, 
 /* 0x6c */	inv, inv, inv, inv, 
 /* 0x70 */	inv, inv, inv, inv,
 /* 0x74 */	jmp_e_b(je imm8/we), jne_b/we, jbe_b/we, inv,
 /* 0x78 */	inv, inv, inv, inv, 
-/* 0x7c */	jl_i8/we, jge_i8/we, jle_i8/we, inv, 
-/* 0x80 */	inv, cmp_il 2 ml, nemu_trap, cmp_imm8_l(32位寄存器和8位立即数比/we), sub i8 to r_l/we cmpl i8 to m_l addl i8 to m_l/we  and_i8_rl/we add_i8_rl/we addl_modrm_sib_disp8_imm8/we
+/* 0x7c */	jl_i8/we, jge_i8/we, jle_i8/we, jg_b/we, 
+/* 0x80 */	cmp_i2m_b/we, cmp_add_l/we, nemu_trap, cmp_imm8_l(32位寄存器和8位立即数比/we), sub i8 to r_l/we cmpl i8 to m_l addl i8 to m_l/we  and_i8_rl/we add_i8_rl/we addl_modrm_sib_disp8_imm8/we
 /* 0x84 */	test_rr_b/we, test_r_l(test r32,r32/we), inv, inv, 
 /* 0x88 */	mov_r2rm_b, mov_r2rm_v, mov_rm2r_b, mov_rm2r_v,
 /* 0x8c */	inv, lea_disp8/32(r)_r/we,, inv, inv, 
@@ -71,10 +77,10 @@ helper_fun opcode_table [256] = {
 /* 0xdc */	inv, inv, inv, inv,
 /* 0xe0 */	inv, inv, inv, inv,
 /* 0xe4 */	inv, inv, inv, inv,
-/* 0xe8 */	call_l/we, jmp_l/we, inv, inv,
-/* 0xec */	inv, inv, jmp_b/we, inv,
+/* 0xe8 */	call_l/we, jmp_l/we, inv, jmp_b/we,
+/* 0xec */	inv, inv, inv, inv,
 /* 0xf0 */	inv, inv, inv, inv,
-/* 0xf4 */	inv, inv, inv, inv,
+/* 0xf4 */	inv, inv, inv, imd_l//* & /,
 /* 0xf8 */	inv, inv, idiv_m_l/we, inv,
 /* 0xfc */	inv, inv, inv, inv
 };
@@ -124,9 +130,9 @@ make_fun op_plus_table[256] = {
 /* 0xa8 */	inv, inv, inv, inv,
 /* 0xac */	inv, inv, inv, imul_rr_l/we,
 /* 0xb0 */	inv, inv, inv, inv,
-/* 0xb4 */	inv, inv, inv, inv,
+/* 0xb4 */	inv, inv, mov_z_bl/we, inv,
 /* 0xb8 */	inv, inv, inv, inv,
-/* 0xbc */	inv, inv, inv, inv,
+/* 0xbc */	inv, inv, mov_s_bl/we, inv,
 /* 0xc0 */	inv, inv, inv, inv,
 /* 0xc4 */	inv, inv, inv, inv,
 /* 0xc8 */	inv, inv, inv, inv,

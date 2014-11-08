@@ -101,41 +101,6 @@ void set_OF(int sec,int fir,bool mark){
 		cpu.OF = 1;
 	else
 		cpu.OF = 0;
-	
-/*	if(fir == 1 && sec == 0x7fffffff) {assert(sec > 0 && fir > 0); assert((fir+sec) < 0);printf("ok!\n");	
-		cpu.OF = 1;}
-    int temp = fir + sec;
-	if(fir > 0 && sec > 0 && temp < 0){
-		if(temp < 0){
-		cpu.OF = 1;
-		printf("continue ok!");}
-		else {cpu.OF = 0;printf("enter!\n");}
-		cpu.OF = 1;
-	}
-	else if(fir < 0 && sec < 0 && fir + sec > 0)
-		cpu.OF = 1;
-	else if(fir >= 0 && sec == 0x80000000 && !mark)
-		cpu.OF = 1;//so unique!
-	else{
-		cpu.OF = 0;printf("0k......\n");
-	}
-*/
-/*	long long temp;
-	if(!mark)
-	   	temp = (long long)fir - sec;
-	else
-		temp = (long long)fir + sec;
-	if(temp > 0x7fffffff){
-
-	printf("temp = %llx\n",temp);
-		cpu.OF = 1;}
-	else if(temp < 0xffffffff80000000L){
-	printf("temp = %llx\n",temp);
-		cpu.OF = 1;}
-	else{
-		cpu.OF = 0;
-	}
-*/
 }
 
 void set_6F(int sec,int fir,int temp,bool mark){
