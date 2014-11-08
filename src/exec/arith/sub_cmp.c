@@ -170,3 +170,21 @@ make_helper(sub_r2m_l){
 	}
 	else return 0;//inv
 }
+
+make_helper(sbb_r2r_l){
+	ModR_M m;
+	m.val = instr_fetch(eip+1,1);
+	int borrow = 0;
+	if(cpu.CF)
+		borrow = 1;
+	if(m.mod == 3){
+	    int sec = reg_l(m.reg) + borrow;
+	    int fir = reg_l(m.R_M);
+	    int temp = fir - sec;
+	    reg_l(m.R_M) = temp;
+	    set_6F(sec,fir,temp,0);
+		print_asm("sbb" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
+		return 2;
+	}
+	else return 0;//inv
+}

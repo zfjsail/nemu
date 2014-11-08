@@ -8,6 +8,7 @@ make_helper(cmp_i2m_b);
 make_helper(cmp_r2r_b);
 make_helper(sub_r2r_l);
 make_helper(sub_r2m_l);
+make_helper(sbb_r2r_l);
 
 make_helper(add_rm2m_l);
 make_helper(add_i2a_l);

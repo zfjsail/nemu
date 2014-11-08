@@ -78,7 +78,7 @@ make_helper(lea_m2r_l){
 					case 2: ss = 4;break;
 					case 3: ss = 8;break;
 				}
-				add_temp = index * ss;
+				add_temp = reg_l(index) * ss;
 			}
 			int addr = disp32 + bx + add_temp;
 			reg_l(m.reg) = addr;

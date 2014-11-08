@@ -173,7 +173,7 @@ void main_loop() {
 	        printf("esi    0x%08x        %10d\n",cpu.esi,cpu.esi);
 	        printf("edi    0x%08x        %10d\n",cpu.edi,cpu.edi);
 	        printf("eip    0x%08x        %10d\n",cpu.eip,cpu.eip);
-			printf("SF = %1x,OF = %1x\n",cpu.SF,cpu.OF);}
+			printf("SF = %1x,OF = %1x,CF = %1x\n",cpu.SF,cpu.OF,cpu.CF);}
 			else if(strcmp(p,"b") == 0)
 				print_bp(true);
 			else if(strcmp(p,"watch") == 0)

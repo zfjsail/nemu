@@ -84,6 +84,16 @@ make_helper(mis_imm8_l){
 				print_asm("addl" " $0x%x,-0x%x(%%%s)",sec,-disp8,regsl[m.R_M]);
 			return 4 + inc;
 		}
+		else if(m.opcode == 5){//subl
+			temp = fir - sec;
+			swaddr_write(addr,4,temp);
+			set_6F(sec,fir,temp,0);
+			if(disp8 >= 0)
+				print_asm("subl" " $0x%x,0x%x(%%%s)",sec,disp8,regsl[m.R_M]);
+			else
+				print_asm("subl" " $0x%x,-0x%x(%%%s)",sec,-disp8,regsl[m.R_M]);
+			return 4 + inc;
+		}
 		else if(m.opcode == 7){//cmpl
 			temp = fir - sec;
 			set_6F(sec,fir,temp,0);
