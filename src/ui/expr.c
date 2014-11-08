@@ -10,9 +10,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+extern int var_to_addr(char *);
+
 /*类型名字吧*/
 enum {
-	NOTYPE = 256, EQ, NUM, HEX, REG, LE, GE, NEQ, AND, OR, LS, RS,P,MN
+	NOTYPE = 256, EQ, NUM, HEX, REG, LE, GE, NEQ, AND, OR, LS, RS,P,MN,VAR
 	/* TODO: Add more token types */
 
 };
@@ -54,7 +56,8 @@ static struct rule {
 	{"\\^",'^',3},
 	{"~",'~',25},
 	{"\\*",P,25},
-	{"-", MN,25}
+	{"-", MN,25},
+	{"^[a-z|A-Z|_][a-z|A-Z|_|0-9]*",VAR,50}
 };
 
 #define NR_REGEX (sizeof(rules) / sizeof(rules[0]) )
@@ -115,19 +118,19 @@ static bool make_token(char *e) {
 				switch(rules[i].token_type) {
 					/*小心NOTYPE不记忆*/
 					case NOTYPE: break;
-					case '+':case '-':case '*':case '/':case EQ:case NUM:case '(':case ')':case HEX:case REG:case '%':case '<':case '>':case LE:case GE:case NEQ:case AND:case OR:case '!':case LS:case RS:case '&':case '|':case '^':case '~':	{
+					case '+':case '-':case '*':case '/':case EQ:case NUM:case '(':case ')':case HEX:case REG:case '%':case '<':case '>':case LE:case GE:case NEQ:case AND:case OR:case '!':case LS:case RS:case '&':case '|':case '^':case '~':case VAR:{
 tokens[nr_token].type = rules[i].token_type;
 tokens[nr_token].pcd = rules[i].pcd;
 nr_token++;break;}//在这个分支计数合适
 	/*先总体初始化，之后再修改‘*’和‘-’的问题*/
 					default: assert(0);
 				}
-				if(rules[i].token_type == NUM || rules[i].token_type == HEX || rules[i].token_type == REG)
+				if(rules[i].token_type == NUM || rules[i].token_type == HEX || rules[i].token_type == REG || rules[i].token_type == VAR)
 				{
 					/*数值需要记录字符串*/
 					if(substr_len > 32) { assert(0);}
 					else
-						strcpy(tokens[nr_token-1].str,substr_start);
+						strncpy(tokens[nr_token-1].str,substr_start,substr_len);
 				}
 
 
@@ -274,6 +277,8 @@ int eval(int p,int q)
 			    default : { assert(0); return 0;}
 			}
 		}
+		else if(tokens[p].type == VAR)
+			return var_to_addr(tokens[p].str);
 		else 
 		{   printf("Invalid expression!\n");
 			assert(0);
@@ -332,11 +337,11 @@ uint32_t expr(char *e, bool *success) {
 	int i;
 	for(i = 0; i < nr_token; i++) {
 		/*处理有双重含义的操作符*/
-		     if(tokens[i].type == '*' && (i == 0 || (tokens[i-1].type != NUM && tokens[i-1].type != HEX && tokens[i-1].type != REG && tokens[i-1].type != ')'))) {
+		     if(tokens[i].type == '*' && (i == 0 || (tokens[i-1].type != NUM && tokens[i-1].type != HEX && tokens[i-1].type != REG && tokens[i-1].type != VAR && tokens[i-1].type != ')'))) {
 					tokens[i].type = P;
 					tokens[i].pcd = 25;
 					    }
-			 else if(tokens[i].type == '-' && (i == 0 || (tokens[i-1].type != NUM && tokens[i-1].type != HEX && tokens[i-1].type != REG && tokens[i-1].type != ')'))) {
+			 else if(tokens[i].type == '-' && (i == 0 || (tokens[i-1].type != NUM && tokens[i-1].type != HEX && tokens[i-1].type != REG && tokens[i-1].type != VAR && tokens[i-1].type != ')'))) {
 				 tokens[i].type = MN;
 				 tokens[i].pcd = 25;
 	                     }

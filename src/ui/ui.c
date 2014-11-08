@@ -12,6 +12,8 @@ int nemu_state = END;
 
 bool suc = true;//表达式是否合法标志
 
+extern void print_bt();
+
 void cpu_exec(uint32_t);
 void restart();
 int str_to_num(char* p);/*数字的字符串表示到十进制表示*/
@@ -203,8 +205,16 @@ void main_loop() {
         /*设置断点*/
 		else if(strcmp(p,"b") == 0)
 		{
-			for(;*p != '*';p++);
-			int temp = expr(p+1,&suc);
+			int temp;
+			for(++p;*p != '*';p++){
+				if(*p == '_') break;
+				if(*p >= 'A' && *p <= 'Z') break;
+				if(*p >= 'a' && *p <= 'z') break;
+			}
+			if(*p == '*')
+			    temp = expr(p+1,&suc);
+			else
+				temp = expr(p,&suc);
 			if(suc)
 				set_b(temp);
 			else
@@ -234,10 +244,12 @@ void main_loop() {
 			bool success = true;
 			int result = expr(p,&success);
 			if(success)
-				printf("Result = %d\n",result);
+				printf("Result = 0x%x\n",result);
 			else
 				printf("Error!\n");
 		}
+		else if(strcmp(p,"bt") == 0)
+			print_bt();
 		else { printf("Unknown command '%s'\n", p); }
 	}
 }

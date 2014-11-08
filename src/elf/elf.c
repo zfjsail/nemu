@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "cpu/reg.h"
 
 #include <stdlib.h>
 #include <elf.h>
@@ -102,3 +103,44 @@ void load_prog() {
 	fclose(fp);
 }
 
+int var_to_addr(char *e){
+	int start = 1;
+	int len;
+	unsigned name_off = 0;
+	while(1){
+		len = strlen(strtab+start);
+		if(strcmp(strtab+start,e) == 0) break;
+		start += (len + 1);
+		if(!(strtab+start)) break;
+	}
+	if(strtab+start) name_off = start;
+	else{
+		printf("Seek failure!\n");
+		return -1;
+	}
+	int i;
+	for(i = 0;i < nr_symtab_entry;i++)
+		if(symtab[i].st_name == name_off) break;
+	if(i < nr_symtab_entry)
+		return symtab[i].st_value;
+	else{
+		printf("Seek failure!\n");
+		return -1;
+	}
+}
+
+void print_bt(){
+	uint32_t addr = cpu.eip;
+	uint32_t ebp = cpu.ebp;
+	int count = 0;
+	while(ebp){
+		int i;
+		for(i = 0;i < nr_symtab_entry;i++)
+			if(addr >= symtab[i].st_value && addr < symtab[i].st_value + symtab[i].st_size) break;
+		printf("#%d 0x%x in %s\n",count,symtab[i].st_value,strtab+symtab[i].st_name);
+		count++;
+		addr = swaddr_read(ebp+4,4);
+		ebp = swaddr_read(ebp,4);
+	}
+	return ;
+}
