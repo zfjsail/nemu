@@ -1,6 +1,7 @@
 #include "prefix/prefix.h"
 
 #include "data-mov/mov.h"
+#include "data-mov/xchg.h"
 #include "stack/stack.h"
 #include "logic/logic.h"
 #include "ct/ct.h"
