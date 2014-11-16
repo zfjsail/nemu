@@ -1,24 +1,12 @@
 #include "exec/helper.h"
 #include "cpu/modrm.h"
+#include "exec/template-start.h"
 
-#include "ui/ui.h"
+//#include "ui/ui.h"
 
-#include "nemu.h"
-
-#define DATA_BYTE 1
-#include "misc-template.h"
-#undef DATA_BYTE
-
-#define DATA_BYTE 2
-#include "misc-template.h"
-#undef DATA_BYTE
-
-#define DATA_BYTE 4
-#include "misc-template.h"
-#undef DATA_BYTE
-
+//#include "nemu.h"
+/*
 make_helper(inv) {
-	/* invalid opcode */
 
 	uint8_t temp[8];
 	((uint32_t *)temp)[0] = instr_fetch(eip, 4);
@@ -28,17 +16,20 @@ make_helper(inv) {
 
 	assert(0);
 }
+*/
 
-bool isBreak = false;//触发断点的标志
+//bool isBreak = false;//触发断点的标志
 
+/*
 make_helper(int3) {
-	/* A breakpoint is hit! Do something here! */
 	isBreak = true;//即将触发断点！
 	printf("A breakpoint is hit!\n");
 
 	return 1;//指令长度噢
 }
+*/
 
+/*
 make_helper(nemu_trap) {
 	printf("nemu: HIT \33[1;31m%s\33[0m TRAP at eip = 0x%08x\n\n", (cpu.eax == 0 ? "GOOD" : "BAD"), cpu.eip);
 	nemu_state = END;
@@ -46,17 +37,19 @@ make_helper(nemu_trap) {
 	print_asm("nemu trap");
 	return 1;
 }
+*/
 
-extern char suffix;
-
-make_helper(lea_m2r_v){
-	return (suffix == 'l' ? lea_m2r_l(eip): lea_m2r_w(eip));
-}
-
-/*
-make_helper(lea_m2r_l){
+make_helper(concat(lea_m2r_,SUFFIX)){
 	ModR_M m;
 	m.val = instr_fetch(eip+1,1);
+	swaddr_t addr;
+	int len = read_ModR_M(eip + 1,&addr);
+	REG(m.reg) = addr;
+
+	print_asm("lea" " %s,%%%s",ModR_M_asm,REG_NAME(m.reg));
+	return len + 1;
+}
+/*
 	int bx = reg_l(m.R_M);
 	if(m.R_M != 4){
 		if(m.mod == 1){
@@ -110,8 +103,10 @@ make_helper(lea_m2r_l){
 		else return 0;//inv
 	}
 }
-*/
 
 make_helper(nop){
 	return 1;
 }
+*/
+
+#include "exec/template-end.h"

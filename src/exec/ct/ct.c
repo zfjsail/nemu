@@ -81,6 +81,16 @@ make_helper(ja_b){
 	return 2;
 }
 
+make_helper(jb_b){
+	if(cpu.CF){
+		int imm;
+		imm = (char)instr_fetch(eip+1,1);
+		cpu.eip += imm;
+	}
+	print_asm("jb" " %x <main+0x%x>",cpu.eip+2,cpu.eip+2-0x100000);
+	return 2;
+}
+
 make_helper(jle_l){
 	if(cpu.ZF || cpu.SF != cpu.OF){
 		int imm;

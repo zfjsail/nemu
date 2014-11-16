@@ -52,6 +52,10 @@ make_helper(mov_s_bl){
 	else return 0;//inv
 }
 
+make_helper(mov_zb_v){
+	return (suffix == 'l' ? mov_zb_l(eip) : mov_zb_w(eip));
+}
+/*
 make_helper(mov_z_bl){
 	ModR_M mm;
 	mm.val = instr_fetch(eip+2,1);
@@ -73,6 +77,6 @@ make_helper(mov_z_bl){
 	}
 	else return 0;//inv
 }
-
+*/
 
 		
