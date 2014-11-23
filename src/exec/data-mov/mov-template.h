@@ -103,4 +103,23 @@ make_helper(concat(mov_zb_,SUFFIX)){
 	}
 }
 
+make_helper(concat(mov_zw_,SUFFIX)){
+	ModR_M mm;
+	mm.val = instr_fetch(eip + 2,1);
+	if(mm.mod == 3){
+		REG(mm.reg) = (unsigned short)REG(mm.R_M);
+
+		print_asm("movzw" str(SUFFIX) " %%%s,%%%s",REG_NAME(mm.R_M),REG_NAME(mm.reg));
+		return 3;
+	}
+	else{
+		swaddr_t addr;
+		int len = read_ModR_M(eip + 2,&addr);
+		REG(mm.reg) = (unsigned short)MEM_R(addr);
+
+		print_asm("movzw" str(SUFFIX) " %s,%%%s",ModR_M_asm,REG_NAME(mm.reg));
+		return len + 2;
+	}
+}
+
 #include "exec/template-end.h"

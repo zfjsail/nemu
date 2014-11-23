@@ -1,6 +1,20 @@
 #include "exec/helper.h"
 #include "cpu/modrm.h"
 
+#define DATA_BYTE 1
+#include "uct_t.h"
+#undef DATA_BYTE
+
+#define DATA_BYTE 2
+#include "uct_t.h"
+#undef DATA_BYTE
+
+#define DATA_BYTE 4
+#include "uct_t.h"
+#undef DATA_BYTE
+
+extern char suffix;
+
 make_helper(jmp_b){
 	uint8_t imm;
 	imm = instr_fetch(eip+1,1);
@@ -17,6 +31,7 @@ make_helper(jmp_l){
 	return 5;
 }
 
+/*
 make_helper(jmp_nr_l){
 	ModR_M m;
 	m.val = instr_fetch(eip+1,4);
@@ -27,3 +42,9 @@ make_helper(jmp_nr_l){
 	}
 	else return 0;//inv
 }
+*/
+
+make_helper(uct_nr_v){
+	return (suffix == 'l' ? uct_nr_l(eip) : uct_nr_w(eip));
+}
+

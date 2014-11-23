@@ -1,20 +1,8 @@
 #include "exec/helper.h"
 #include "cpu/modrm.h"
+#include "exec/template-start.h"
 
-#define DATA_BYTE 1
-#include "sub_cmp_tpl.h"
-#undef DATA_BYTE
-
-#define DATA_BYTE 2
-#include "sub_cmp_tpl.h"
-#undef DATA_BYTE
-
-#define DATA_BYTE 4
-#include "sub_cmp_tpl.h"
-#undef DATA_BYTE
-
-extern char suffix;
-
+/*
 make_helper(cmp_add_l){
 	ModR_M m;
 	int temp;
@@ -49,7 +37,9 @@ make_helper(cmp_add_l){
 	}
 	else return 0;//inv
 }
+*/
 
+/*
 make_helper(cmp_m2r_l){
 	ModR_M m;
 	int temp;
@@ -94,24 +84,34 @@ make_helper(cmp_m2r_l){
 	}
 	else return 0;//inv
 }
-
-/*
-make_helper(cmp_r2r_l){
-	ModR_M m;
-	int temp;
-	m.val = instr_fetch(eip+1,1);
-	if(m.mod == 3){
-		int fir = reg_l(m.R_M);
-		int sec = reg_l(m.reg);
-		temp = fir - sec;
-		set_6F(sec,fir,temp,0);
-		print_asm("cmp" " %%%s,%%%s",regsl[m.reg],regsl[m.R_M]);
-		return 2;
-	}
-	else return 0;//inv
-}
 */
 
+make_helper(concat(cmp_r2r_,SUFFIX)){
+	ModR_M m;
+	DATA_TYPE fir,sec;
+	DATA_TYPE temp;
+	m.val = instr_fetch(eip+1,1);
+    sec = REG(m.reg);
+	if(m.mod == 3){
+		fir = REG(m.R_M);
+		temp = fir - sec;
+		set_6F(sec,fir,temp,0);
+		print_asm("cmp" " %%%s,%%%s",REG_NAME(m.reg),REG_NAME(m.R_M));
+		return 2;
+	}
+	else{
+		swaddr_t addr;
+		int len = read_ModR_M(eip + 1,&addr);
+		fir = MEM_R(addr);
+		temp = fir - sec;
+		set_6F(sec,fir,temp,0);
+
+		print_asm("cmp" str(SUFFIX) " %%%s,%s",REG_NAME(m.reg),ModR_M_asm);
+		return len + 1;
+	}
+}
+
+/*
 make_helper(cmp_i2m_b){
 	ModR_M m;
 	char temp;
@@ -134,8 +134,10 @@ make_helper(cmp_i2m_b){
 	}
 	else return 0;//inv
 }
+*/
+
 /*
-make_helper(cmp_r2r_l){
+make_helper(cmp_r2r_b){
 	ModR_M m;
 	char temp;
 	m.val = instr_fetch(eip+1,1);
@@ -148,11 +150,6 @@ make_helper(cmp_r2r_l){
 		return 2;
 	}
 	else return 0;//inv
-}
-*/
-
-make_helper(cmp_r2r_v){
-	return (suffix == 'l' ? cmp_r2r_l(eip) : cmp_r2r_w(eip));
 }
 
 make_helper(sub_r2r_l){
@@ -209,3 +206,5 @@ make_helper(sbb_r2r_l){
 	}
 	else return 0;//inv
 }
+*/
+#include "exec/template-end.h"

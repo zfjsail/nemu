@@ -9,7 +9,7 @@ make_helper(op_plus);
 /* TODO: Add more instructions!!! */
 
 helper_fun opcode_table [256] = {
-/* 0x00 */	inv, add_rm2m_l, inv, inv, 
+/* 0x00 */	inv, add_rm2m_v, add_rm2r_v, inv, 
 /* 0x04 */	inv, add_i2a_l, inv, inv, 
 /* 0x08 */	inv, or_r_l, inv, inv, 
 /* 0x0c */	inv, inv, inv, op_plus, 
@@ -23,7 +23,7 @@ helper_fun opcode_table [256] = {
 /* 0x2c */	inv, inv, inv, inv, 
 /* 0x30 */	inv, xor_r_l, inv, inv, 
 /* 0x34 */	inv, inv, inv, inv,
-/* 0x38 */	cmp_r2r_b, cmp_r2r_l, inv, cmp_m2r_l, 
+/* 0x38 */	cmp_r2r_b, cmp_r2r_v, inv, cmp_m2r_l, 
 /* 0x3c */	inv, inv, inv, inv, 
 /* 0x40 */	inv, inv, inv, inv, 
 /* 0x44 */	inv, inv, inv, inv,
@@ -72,7 +72,7 @@ helper_fun opcode_table [256] = {
 /* 0xf0 */	inv, inv, inv, inv,
 /* 0xf4 */	inv, inv, inv, imd_l,
 /* 0xf8 */	inv, inv, inv, inv,
-/* 0xfc */	inv, inv, inv, jmp_nr_l
+/* 0xfc */	inv, inv, inv, uct_nr_v
 };
 
 helper_fun op_plus_table[256] = {
@@ -121,7 +121,7 @@ helper_fun op_plus_table[256] = {
 /* 0xa8 */	inv, inv, inv, inv,
 /* 0xac */	inv, inv, inv, imul_rm2r_l,
 /* 0xb0 */	inv, inv, inv, inv,
-/* 0xb4 */	inv, inv, mov_zb_v, inv,
+/* 0xb4 */	inv, inv, mov_zb_v, mov_zw_l,
 /* 0xb8 */	inv, inv, inv, inv,
 /* 0xbc */	inv, inv, mov_s_bl, inv,
 /* 0xc0 */	inv, inv, inv, inv,

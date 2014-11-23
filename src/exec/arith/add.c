@@ -1,6 +1,24 @@
 #include "exec/helper.h"
 #include "cpu/modrm.h"
 
+#define DATA_BYTE 1
+#include "add_t.h"
+#undef DATA_BYTE
+
+#define DATA_BYTE 2
+#include "add_t.h"
+#undef DATA_BYTE
+
+#define DATA_BYTE 4
+#include "add_t.h"
+#undef DATA_BYTE
+
+extern char suffix;
+
+make_helper(add_rm2m_v){
+	return (suffix == 'l' ? add_rm2m_l(eip) : add_rm2m_l(eip));
+}
+/*
 make_helper(add_rm2m_l){
 	ModR_M m;
 	int temp;
@@ -28,7 +46,7 @@ make_helper(add_rm2m_l){
 	}
 	else return 0;//inv
 }
-
+*/
 make_helper(add_i2a_l){
 	int add_2 = instr_fetch(eip+1,4);
 	int add_1 = cpu.eax;
@@ -54,4 +72,8 @@ make_helper(adc_r2r_l){
 		return 2;
 	}
 	else return 0;//inv
+}
+
+make_helper(add_rm2r_v){
+	return (suffix == 'l' ? add_rm2r_l(eip) : add_rm2r_w(eip));
 }

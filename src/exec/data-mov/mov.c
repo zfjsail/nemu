@@ -1,4 +1,5 @@
 #include "exec/helper.h"
+#include "cpu/modrm.h"
 
 #define DATA_BYTE 1
 #include "mov-template.h"
@@ -79,4 +80,6 @@ make_helper(mov_z_bl){
 }
 */
 
-		
+make_helper(mov_zw_v){
+	return mov_zw_l(eip);
+}

@@ -4,7 +4,7 @@
 make_helper(jmp_e_b);
 make_helper(jmp_b);
 make_helper(jmp_l);
-make_helper(jmp_nr_l);
+make_helper(uct_nr_v);
 
 make_helper(jle_b);
 make_helper(jl_b);
