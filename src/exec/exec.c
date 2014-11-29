@@ -9,7 +9,7 @@ make_helper(op_plus);
 /* TODO: Add more instructions!!! */
 
 helper_fun opcode_table [256] = {
-/* 0x00 */	inv, add_rm2m_v, add_rm2r_v, inv, 
+/* 0x00 */	inv, add_rm2m_v, add_rm2r_v, add_rm2r_v, 
 /* 0x04 */	inv, add_i2a_l, inv, inv, 
 /* 0x08 */	inv, or_r_l, inv, inv, 
 /* 0x0c */	inv, inv, inv, op_plus, 
@@ -25,10 +25,10 @@ helper_fun opcode_table [256] = {
 /* 0x34 */	inv, inv, inv, inv,
 /* 0x38 */	cmp_r2r_b, cmp_r2r_v, inv, cmp_m2r_l, 
 /* 0x3c */	inv, inv, inv, inv, 
-/* 0x40 */	inv, inv, inv, inv, 
-/* 0x44 */	inv, inv, inv, inv,
-/* 0x48 */	inv, inv, inv, inv, 
-/* 0x4c */	inv, inv, inv, inv, 
+/* 0x40 */	inc_r_v, inc_r_v, inc_r_v, inc_r_v, 
+/* 0x44 */	inc_r_v, inc_r_v, inc_r_v, inc_r_v,
+/* 0x48 */	dec_r_v, dec_r_v, dec_r_v, dec_r_v, 
+/* 0x4c */	dec_r_v, dec_r_v, dec_r_v, dec_r_v, 
 /* 0x50 */	push_r_l, push_r_l, push_r_l, push_r_l, 
 /* 0x54 */	push_r_l, push_r_l, push_r_l, push_r_l,
 /* 0x58 */	pop_r_l, pop_r_l, pop_r_l, pop_r_l, 
@@ -109,7 +109,7 @@ helper_fun op_plus_table[256] = {
 /* 0x78 */	inv, inv, inv, inv, 
 /* 0x7c */	inv, inv, inv, inv, 
 /* 0x80 */	inv, inv, inv, inv,
-/* 0x84 */	inv, inv, jbe_l, inv, 
+/* 0x84 */	je_l, inv, jbe_l, inv, 
 /* 0x88 */	inv, inv, inv, inv,
 /* 0x8c */	jl_l, inv, jle_l, inv, 
 /* 0x90 */	inv, inv, inv, inv,

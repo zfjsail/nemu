@@ -111,6 +111,19 @@ make_helper(concat(cmp_r2r_,SUFFIX)){
 	}
 }
 
+make_helper(concat(dec_r_,SUFFIX)){
+	DATA_TYPE fir;
+	int pre_CF = cpu.CF;
+	ModR_M m;
+	m.val = instr_fetch(eip,1);
+	fir = REG(m.R_M);
+	REG(m.R_M) -= 1;
+	set_6F(1,fir,REG(m.R_M),0);
+	cpu.CF = pre_CF;
+	print_asm("dec" " %%%s",REG_NAME(m.R_M));
+	return 1;
+}
+
 /*
 make_helper(cmp_i2m_b){
 	ModR_M m;

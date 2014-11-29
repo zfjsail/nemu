@@ -209,3 +209,7 @@ make_helper(sbb_r2r_l){
 	}
 	else return 0;//inv
 }
+
+make_helper(dec_r_v){
+	return (suffix == 'l' ? dec_r_l(eip) : dec_r_w(eip));
+}

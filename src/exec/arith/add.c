@@ -77,3 +77,7 @@ make_helper(adc_r2r_l){
 make_helper(add_rm2r_v){
 	return (suffix == 'l' ? add_rm2r_l(eip) : add_rm2r_w(eip));
 }
+
+make_helper(inc_r_v){
+	return (suffix == 'l' ? inc_r_l(eip) : inc_r_w(eip));
+}

@@ -53,4 +53,17 @@ make_helper(concat(add_rm2r_,SUFFIX)){
 		return len + 1;
 	}
 }
+
+make_helper(concat(inc_r_,SUFFIX)){
+	DATA_TYPE add_1;
+	int pre_CF = cpu.CF;
+	ModR_M m;
+	m.val = instr_fetch(eip,1);
+	add_1 = REG(m.R_M);
+	REG(m.R_M) += 1;
+	set_6F(1,add_1,REG(m.R_M),1);
+	cpu.CF = pre_CF;
+	print_asm("inc" " %%%s",REG_NAME(m.R_M));
+	return 1;
+}
 #include "exec/template-end.h"

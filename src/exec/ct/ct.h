@@ -17,6 +17,7 @@ make_helper(jb_b);
 make_helper(jle_l);
 make_helper(jbe_l);
 make_helper(jl_l);
+make_helper(je_l);
 
 make_helper(op_plus_l);
 

@@ -120,3 +120,13 @@ make_helper(jl_l){
 	print_asm("jl" " %x <main+0x%x>",cpu.eip+6,cpu.eip+6-0x100000);
 	return 6;
 }
+
+make_helper(je_l){
+	if(cpu.ZF){
+		int imm;
+		imm = instr_fetch(eip+2,4);
+		cpu.eip += imm;
+	}
+	print_asm("je" " %x <main+0x%x>",cpu.eip+6,cpu.eip+6-0x100000);
+	return 6;
+}

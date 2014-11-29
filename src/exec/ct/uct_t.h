@@ -6,8 +6,11 @@ make_helper(concat(uct_nr_,SUFFIX)){
 	ModR_M m;
 	m.val = instr_fetch(eip+1,4);
 	if(m.mod == 3){
+	  swaddr_t eip_temp = cpu.eip;
 	  cpu.eip = REG(m.R_M) - 2;
 	  if(m.opcode == 2){
+		  cpu.esp -= 4;
+		  MEM_W(cpu.esp,eip_temp);
 		  print_asm("call" " *%%%s",REG_NAME(m.R_M));
 		  return 2;
 	  }
@@ -19,8 +22,11 @@ make_helper(concat(uct_nr_,SUFFIX)){
 	}
 	else{
 		if(m.opcode == 2){
+			cpu.esp -= 4;
+			MEM_W(cpu.esp,cpu.eip);
 			swaddr_t addr;
 			int len = read_ModR_M(eip + 1,&addr);
+			addr = MEM_R(addr + 0x800000);
 			cpu.eip = addr - len - 1;
 
 			print_asm("call" " *%s",ModR_M_asm);
