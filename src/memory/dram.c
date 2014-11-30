@@ -55,7 +55,7 @@ static void ddr3_read(hwaddr_t addr, void *data) {
 	test(addr < HW_MEM_SIZE, "addr = %x\n", addr);
 
 	dram_addr temp;
-	temp.addr = addr & ~BURST_MASK;
+	temp.addr = addr & ~BURST_MASK;//~7
 	uint32_t rank = temp.rank;
 	uint32_t bank = temp.bank;
 	uint32_t row = temp.row;
@@ -69,7 +69,7 @@ static void ddr3_read(hwaddr_t addr, void *data) {
 	}
 
 	/* burst read */
-	memcpy(data, rowbufs[rank][bank].buf + col, BURST_LEN);
+	memcpy(data, rowbufs[rank][bank].buf + col, BURST_LEN);//8
 }
 
 static void ddr3_write(hwaddr_t addr, void *data, uint8_t *mask) {
@@ -96,6 +96,7 @@ static void ddr3_write(hwaddr_t addr, void *data, uint8_t *mask) {
 	memcpy(dram[rank][bank][row], rowbufs[rank][bank].buf, NR_COL);
 }
 
+//还没看懂（从这里开始）
 uint32_t dram_read(hwaddr_t addr, size_t len) {
 	assert(len == 1 || len == 2 || len == 4);
 	uint32_t offset = addr & BURST_MASK;
@@ -116,7 +117,7 @@ void dram_write(hwaddr_t addr, size_t len, uint32_t data) {
 	uint32_t offset = addr & BURST_MASK;
 	uint8_t temp[2 * BURST_LEN];
 	uint8_t mask[2 * BURST_LEN];
-	memset(mask, 0, 2 * BURST_MASK);
+	memset(mask, 0, 2 * BURST_LEN);
 
 	*(uint32_t *)(temp + offset) = data;
 	memset(mask + offset, 1, len);
@@ -129,3 +130,119 @@ void dram_write(hwaddr_t addr, size_t len, uint32_t data) {
 	}
 }
 
+//Now cache shows up......
+
+#define BLOCK_WIDTH 6
+#define SET_WIDTH 7
+
+#define BLOCK_SZ 1 << 6
+#define SET_SZ 1 << 7
+#define ROW_OF_SET 1 << 3
+
+typedef struct {
+	uint8_t block[BLOCK_SZ];
+	int32_t tag;
+	bool valid;
+} cache1_unit;
+
+typedef union {
+	struct {
+		uint32_t off : BLOCK_WIDTH;//lower bits
+		uint32_t set : SET_WIDTH;
+		uint32_t tag : 32 - BLOCK_WIDTH - SET_WIDTH;
+	};
+	uint32_t addr;
+} cache_addr;
+
+typedef cache1_unit CU_1;
+
+CU_1 cache1[SET_SZ][ROW_OF_SET];
+
+uint8_t srand_07(){
+//inv
+//just testing...
+	return 0;
+}
+
+void init_cache1(){
+	int i,j;
+	for(i = 0; i < SET_SZ; i++)
+		for(j = 0; j < ROW_OF_SET; j++)
+			cache1[i][j].valid = false;
+}
+
+uint32_t seek_row1(hwaddr_t addr){
+	cache_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t tag = chaddr.tag;
+	uint32_t set = chaddr.set;
+
+	int i;
+	for(i = 0; i < ROW_OF_SET; i++)
+		if(cache1[set][i].valid && cache1[set][i].tag == tag) break;
+	return i;
+}
+
+void cache1_write(hwaddr_t addr,size_t len,uint32_t data) {
+	assert(len == 1 || len == 2 || len == 4);
+	cache_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t set = chaddr.set;
+	uint32_t row = seek_row1(addr);
+	assert(row != 8);
+	uint32_t off = chaddr.off;
+
+	uint32_t temp = data;
+	memcpy(cache1[set][row].block + off, &temp, len);
+}
+
+void write_through(hwaddr_t addr,size_t len,uint32_t data) {
+	if(seek_row1(addr) < 8){
+		cache1_write(addr,len,data);
+		dram_write(addr,len,data);
+	}
+	else
+		dram_write(addr,len,data);
+}
+
+uint8_t isReplace(hwaddr_t addr) {
+	cache_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t set = chaddr.set;
+	int i;
+	for(i = 0; i < ROW_OF_SET; i++)
+		if(cache1[set][i].valid == false) return i;
+	return 8;//need replace
+}
+
+/* including loading blocks */
+uint32_t cache1_read(hwaddr_t addr,size_t len){
+	assert(len == 1 || len == 2 || len == 4);
+	cache_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t tag = chaddr.tag;
+	uint32_t set = chaddr.set;
+	uint32_t row = seek_row1(addr);
+	uint32_t off = chaddr.off;
+	if(row == ROW_OF_SET) {//miss
+		if((row = isReplace(addr)) == 8) row = srand_07();
+		cache1[set][row].valid = true;
+		cache1[set][row].tag = tag;
+		
+		dram_read(addr, len);
+
+		dram_addr temp;
+		temp.addr = addr;
+		uint32_t rank = temp.rank;
+		uint32_t bank = temp.bank;
+//		uint32_t rrow = temp.row;//blending...
+		uint32_t col = temp.col;
+		uint32_t off_rbuf = col >> BLOCK_WIDTH;
+
+		memcpy(cache1[set][row].block, rowbufs[rank][bank].buf + (off_rbuf << BLOCK_WIDTH), BLOCK_SZ);
+
+//		memcpy(cache1[set][row].block,(void *)addr_start,BLOCK_SZ);
+	}
+	
+	return *(uint32_t *)(cache1[set][row].block + off) & (~0u >> ((4 - len) << 3));
+}
