@@ -11,6 +11,7 @@ int exec(swaddr_t);
 void load_prog();
 void init_dram();
 void init_cache1();
+void init_cache2();
 
 char assembly[40];
 jmp_buf jbuf;	/* Make it easy to perform exception handling */
@@ -53,6 +54,7 @@ void restart() {
 
 	init_dram();
 	init_cache1();
+	init_cache2();
 }
 
 static void print_bin_instr(swaddr_t eip, int len) {

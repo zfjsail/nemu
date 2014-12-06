@@ -17,6 +17,9 @@
 #include "misc-template.h"
 #undef DATA_BYTE
 
+extern uint64_t ccount;
+extern bool t[12];
+
 make_helper(inv) {
 	/* invalid opcode */
 
@@ -42,7 +45,12 @@ make_helper(int3) {
 make_helper(nemu_trap) {
 	printf("nemu: HIT \33[1;31m%s\33[0m TRAP at eip = 0x%08x\n\n", (cpu.eax == 0 ? "GOOD" : "BAD"), cpu.eip);
 	nemu_state = END;
-
+/*
+	int i;
+	for(i = 0 ;i < 12; i++)
+		printf("%d\n",(int)t[i]);
+	printf("\n");
+*/
 	print_asm("nemu trap");
 	return 1;
 }

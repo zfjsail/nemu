@@ -1,5 +1,6 @@
 #include "common.h"
 #include "lib/misc.h"
+#include <stdlib.h>
 
 /* Simulate the (main) behavor of DRAM. Although this will lower the performace of NEMU,
  * it makes you clear about how DRAM is read/written.
@@ -131,13 +132,21 @@ void dram_write(hwaddr_t addr, size_t len, uint32_t data) {
 }
 
 //Now cache shows up......
+//in order to enter each function
+//when write miss and need replace, we replace cache1
+//when read miss and need replace,we replace cache2
+
+bool t[12];
 
 #define BLOCK_WIDTH 6
-#define SET_WIDTH 7
+#define SET_WIDTH1 7
+#define SET_WIDTH2 12
 
-#define BLOCK_SZ 1 << 6
-#define SET_SZ 1 << 7
-#define ROW_OF_SET 1 << 3
+#define BLOCK_SZ 1 << BLOCK_WIDTH
+#define SET_SZ1 1 << SET_WIDTH1
+#define ROW_OF_SET1 1 << 3
+#define SET_SZ2 1 << SET_WIDTH2
+#define ROW_OF_SET2 1 << 4
 
 typedef struct {
 	uint8_t block[BLOCK_SZ];
@@ -145,47 +154,92 @@ typedef struct {
 	bool valid;
 } cache1_unit;
 
+typedef struct {
+	uint8_t block[BLOCK_SZ];
+	int32_t tag;
+	bool valid;
+	bool dirty;
+} cache2_unit;
+
 typedef union {
 	struct {
 		uint32_t off : BLOCK_WIDTH;//lower bits
-		uint32_t set : SET_WIDTH;
-		uint32_t tag : 32 - BLOCK_WIDTH - SET_WIDTH;
+		uint32_t set : SET_WIDTH1;
+		uint32_t tag : 32 - BLOCK_WIDTH - SET_WIDTH1;
 	};
 	uint32_t addr;
-} cache_addr;
+} cache1_addr;
+
+typedef union {
+	struct {
+		uint32_t off : BLOCK_WIDTH;
+		uint32_t set : SET_WIDTH2;
+		uint32_t tag : 32 - BLOCK_WIDTH - SET_WIDTH2;
+	};
+	uint32_t addr;
+} cache2_addr;
 
 typedef cache1_unit CU_1;
+typedef cache2_unit CU_2;
 
-CU_1 cache1[SET_SZ][ROW_OF_SET];
+CU_1 cache1[SET_SZ1][ROW_OF_SET1];
+CU_2 cache2[SET_SZ2][ROW_OF_SET2];
 
+uint64_t ccount = 0;
+
+/*
 uint8_t srand_07(){
+
 //inv
 //just testing...
 	return 0;
 }
+*/
 
 void init_cache1(){
 	int i,j;
-	for(i = 0; i < SET_SZ; i++)
-		for(j = 0; j < ROW_OF_SET; j++)
+	for(i = 0; i < SET_SZ1; i++)
+		for(j = 0; j < ROW_OF_SET1; j++)
 			cache1[i][j].valid = false;
 }
 
+void init_cache2(){
+	int i,j;
+	for(i = 0; i < SET_SZ2; i++)
+		for(j = 0; j < ROW_OF_SET2; j++)
+			cache2[i][j].valid = false;
+}
+
 uint32_t seek_row1(hwaddr_t addr){
-	cache_addr chaddr;
+	cache1_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t tag = chaddr.tag;
+	uint32_t set = chaddr.set;
+
+//	printf("%d %d\n",set,tag);
+	int i;
+	for(i = 0; i < ROW_OF_SET1; i++)
+		if(cache1[set][i].valid && cache1[set][i].tag == tag) break;
+	return i;
+}
+
+uint32_t seek_row2(hwaddr_t addr){
+	cache2_addr chaddr;
 	chaddr.addr = addr;
 	uint32_t tag = chaddr.tag;
 	uint32_t set = chaddr.set;
 
 	int i;
-	for(i = 0; i < ROW_OF_SET; i++)
-		if(cache1[set][i].valid && cache1[set][i].tag == tag) break;
+	for(i = 0; i < ROW_OF_SET2; i++)
+		if(cache2[set][i].valid && cache2[set][i].tag == tag) break;
 	return i;
 }
 
 void cache1_write(hwaddr_t addr,size_t len,uint32_t data) {
+//	Log("write cache1!\n");
+	t[0] = true;
 	assert(len == 1 || len == 2 || len == 4);
-	cache_addr chaddr;
+	cache1_addr chaddr;
 	chaddr.addr = addr;
 	uint32_t set = chaddr.set;
 	uint32_t row = seek_row1(addr);
@@ -196,36 +250,179 @@ void cache1_write(hwaddr_t addr,size_t len,uint32_t data) {
 	memcpy(cache1[set][row].block + off, &temp, len);
 }
 
+
+uint8_t isReplace1(hwaddr_t addr);
+void write_back(hwaddr_t addr,size_t len,uint32_t data);
 void write_through(hwaddr_t addr,size_t len,uint32_t data) {
-	if(seek_row1(addr) < 8){
+//	printf("seekrow1 = %d\n",seek_row1(addr));
+	if(seek_row1(addr) < ROW_OF_SET1){
 		cache1_write(addr,len,data);
 		dram_write(addr,len,data);
+		//Log("cache1 write through hit!\n");
+		t[1] = true;
 	}
-	else
+	else {
+		if(seek_row2(addr) < ROW_OF_SET2 || isReplace1(addr) == ROW_OF_SET1) 
+		    write_back(addr,len,data);
 		dram_write(addr,len,data);
+//	Log("not write allocate!\n");
+	}
 }
 
-uint8_t isReplace(hwaddr_t addr) {
-	cache_addr chaddr;
+uint8_t isReplace2(hwaddr_t addr) {
+	cache2_addr chaddr;
 	chaddr.addr = addr;
 	uint32_t set = chaddr.set;
 	int i;
-	for(i = 0; i < ROW_OF_SET; i++)
-		if(cache1[set][i].valid == false) return i;
-	return 8;//need replace
+	for(i = 0; i < ROW_OF_SET2; i++)
+		if(cache2[set][i].valid == false) return i;
+	return i;//need replace
 }
 
-/* including loading blocks */
-uint32_t cache1_read(hwaddr_t addr,size_t len){
-	assert(len == 1 || len == 2 || len == 4);
-	cache_addr chaddr;
+uint32_t read_block1(hwaddr_t addr) {
+	uint32_t row = isReplace1(addr);
+	cache1_addr chaddr;
 	chaddr.addr = addr;
 	uint32_t tag = chaddr.tag;
 	uint32_t set = chaddr.set;
+
+	if(row == ROW_OF_SET1) {//need replace
+		uint32_t row = rand() % ROW_OF_SET1;
+		hwaddr_t addr_start = addr & ~0x3f;
+		memcpy((void *)addr_start,cache1[set][row].block,BLOCK_SZ);
+//		Log("cache1 replace\n");
+		t[2] = true;
+	}
+
+	t[11] = true;
+	dram_read(addr,1);
+
+	dram_addr temp;
+	temp.addr = addr;
+	uint32_t rank = temp.rank;
+    uint32_t bank = temp.bank;
+    uint32_t col = temp.col;
+    uint32_t off_rbuf = col >> BLOCK_WIDTH;
+
+    memcpy(cache1[set][row].block, rowbufs[rank][bank].buf + (off_rbuf << BLOCK_WIDTH), BLOCK_SZ);
+
+	cache1[set][row].valid = true;
+//	printf("%d %d %d\n",set,cache1[set][row].valid,cache1[set][row].tag);
+	cache1[set][row].tag = tag;
+	return row;
+}
+
+uint32_t read_block2(hwaddr_t addr, size_t len, uint32_t data) {
+	uint32_t row = isReplace2(addr);
+	cache2_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t tag = chaddr.tag;
+	uint32_t set = chaddr.set;
+
+	if(row == 16) {//need replace
+		uint32_t row = rand() % 16;
+		if(cache2[set][row].dirty) {
+			hwaddr_t addr_start = addr & ~0x3f;
+			memcpy((void *)addr_start,cache2[set][row].block,BLOCK_SZ);
+//			Log("cache2 replace\n");
+			t[3] = true;
+		}
+	}
+
+	/* write allocate */
+	if(len) {
+	    dram_write(addr,len,data);
+		dram_read(addr,len);
+//		Log("write allocate");
+		t[4] = true;
+	}
+	else {
+		dram_read(addr,1);
+//		Log("just fit\n");
+		t[5] = true;
+	}
+
+	dram_addr temp;
+	temp.addr = addr;
+	uint32_t rank = temp.rank;
+    uint32_t bank = temp.bank;
+    uint32_t col = temp.col;
+    uint32_t off_rbuf = col >> BLOCK_WIDTH;
+
+    memcpy(cache2[set][row].block, rowbufs[rank][bank].buf + (off_rbuf << BLOCK_WIDTH), BLOCK_SZ);
+
+	cache2[set][row].valid = true;
+	cache2[set][row].tag = tag;
+	return row;
+}
+
+void cache2_write(hwaddr_t addr,size_t len,uint32_t data) {
+//	Log("cache2 write\n");
+	t[6] = true;
+	assert(len == 1 || len == 2 || len == 4);
+	cache2_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t set = chaddr.set;
+	uint32_t row = seek_row2(addr);
+	assert(row != ROW_OF_SET2);
+	uint32_t off = chaddr.off;
+
+	uint32_t temp = data;
+	memcpy(cache2[set][row].block + off, &temp, len);
+}
+
+void write_back(hwaddr_t addr,size_t len,uint32_t data) {
+	cache2_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t set = chaddr.set;
+	uint32_t row = seek_row2(addr);
+	if(row < 16) {//hit
+//		Log("write back hit\n");
+		t[7] = true;
+		cache2_write(addr,len,data);
+		cache2[set][row].dirty = true;
+	}
+	else {//miss
+	    read_block2(addr, len, data);
+//		Log("write back miss and read block2\n");
+		t[8] = true;
+	}
+}
+
+uint8_t isReplace1(hwaddr_t addr) {
+	cache1_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t set = chaddr.set;
+	int i;
+	for(i = 0; i < ROW_OF_SET1; i++)
+		if(cache1[set][i].valid == false) return i;
+	return i;//need replace
+}
+
+uint32_t cache2_read(hwaddr_t addr, size_t len);
+
+/* including loading blocks */
+uint32_t cache1_read(hwaddr_t addr, size_t len){
+	assert(len == 1 || len == 2 || len == 4);
+	cache1_addr chaddr;
+	chaddr.addr = addr;
+//	uint32_t tag = chaddr.tag;
+	uint32_t set = chaddr.set;
 	uint32_t row = seek_row1(addr);
 	uint32_t off = chaddr.off;
-	if(row == ROW_OF_SET) {//miss
-		if((row = isReplace(addr)) == 8) row = srand_07();
+//	Log("%d\n",row);
+	if(row == ROW_OF_SET1) {//miss
+		row = seek_row2(addr);
+		if(row < ROW_OF_SET2)
+		    return cache2_read(addr,len);
+		else if(isReplace1(addr) < ROW_OF_SET1)
+			row = read_block1(addr);
+		else
+			return cache2_read(addr,len);
+	}
+/*
+		ccount += 198;
+		if((row = isReplace1(addr)) == 8) row = rand() % 8;
 		cache1[set][row].valid = true;
 		cache1[set][row].tag = tag;
 		
@@ -235,14 +432,35 @@ uint32_t cache1_read(hwaddr_t addr,size_t len){
 		temp.addr = addr;
 		uint32_t rank = temp.rank;
 		uint32_t bank = temp.bank;
-//		uint32_t rrow = temp.row;//blending...
+		uint32_t rrow = temp.row;//blending...
 		uint32_t col = temp.col;
 		uint32_t off_rbuf = col >> BLOCK_WIDTH;
 
 		memcpy(cache1[set][row].block, rowbufs[rank][bank].buf + (off_rbuf << BLOCK_WIDTH), BLOCK_SZ);
+		cache1[set][row].valid = true;
 
-//		memcpy(cache1[set][row].block,(void *)addr_start,BLOCK_SZ);
+		memcpy(cache1[set][row].block,(void *)addr_start,BLOCK_SZ);
 	}
-	
+*/
+	ccount += 2;
 	return *(uint32_t *)(cache1[set][row].block + off) & (~0u >> ((4 - len) << 3));
+}
+
+uint32_t cache2_read(hwaddr_t addr, size_t len) {
+	assert(len == 1 || len == 2 || len == 4);
+	cache2_addr chaddr;
+	chaddr.addr = addr;
+	uint32_t row = seek_row2(addr);
+	if(row == ROW_OF_SET2) {
+		row = read_block2(addr,0,0);
+//		Log("cache2 read miss read block2\n");
+		t[9] = true;
+	}
+	else
+		t[10] = true;
+	
+	uint32_t set = chaddr.set;
+	uint32_t off = chaddr.off;
+
+	return *(uint32_t *)(cache2[set][row].block + off) & (~0u >> ((4 - len) << 3));
 }
