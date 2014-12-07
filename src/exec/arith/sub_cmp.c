@@ -50,6 +50,7 @@ make_helper(cmp_add_l){
 	else return 0;//inv
 }
 
+/*
 make_helper(cmp_m2r_l){
 	ModR_M m;
 	int temp;
@@ -94,6 +95,7 @@ make_helper(cmp_m2r_l){
 	}
 	else return 0;//inv
 }
+*/
 
 /*
 make_helper(cmp_r2r_l){
@@ -150,6 +152,10 @@ make_helper(cmp_r2r_l){
 	else return 0;//inv
 }
 */
+
+make_helper(cmp_rm2r_v) {
+	return (suffix == 'l' ? cmp_rm2r_l(eip) : cmp_rm2r_w(eip));
+}
 
 make_helper(cmp_r2r_v){
 	return (suffix == 'l' ? cmp_r2r_l(eip) : cmp_r2r_w(eip));

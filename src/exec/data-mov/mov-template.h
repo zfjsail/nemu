@@ -122,4 +122,33 @@ make_helper(concat(mov_zw_,SUFFIX)){
 	}
 }
 
+make_helper(concat(mov_cr2gr_,SUFFIX)) {
+	ModR_M mm;
+	mm.val = instr_fetch(eip + 2,1);
+	if(mm.mod == 3) {
+		if(mm.reg == 0) {
+			REG(mm.R_M) = cpu.CR0.val;
+			print_asm("mov" " %%cr0,%%%s",REG_NAME(mm.R_M));
+			return 3;
+		}
+		else //inv
+			return 0;
+	}
+	else return 0;//inv
+}
+
+make_helper(concat(mov_gr2cr_,SUFFIX)) {
+	ModR_M mm;
+	mm.val = instr_fetch(eip + 2,1);
+	if(mm.mod == 3) {
+		if(mm.R_M == 0) {
+			cpu.CR0.val = REG(mm.reg);
+			print_asm("mov" " %%%s,%%cr0",REG_NAME(mm.reg));
+			return 3;
+		}
+		else return 0;//inv
+	}
+	else return 0;//inv
+}
+
 #include "exec/template-end.h"

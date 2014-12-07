@@ -28,17 +28,47 @@ typedef union {
     swaddr_t eip;
 	union{
 		struct {
-			int N0:8; int N1:6;
-		    int VM:1; int RF:1; int N2:1; int NT:1;
-		    int IOPL:2; int OF:1; int DF:1;
-		    int IF:1; int TF:1; int SF:1; int ZF:1;
-		    int N3:1; int AF:1; int N4:1; int PF:1;
-		    int N5:1; int CF:1;
+			int CF : 1; int : 1; int PF : 1; int : 1;
+			int AF : 1; int : 1; int ZF : 1; int SF : 1;
+			int TF : 1; int IF : 1; int DF : 1; int OF : 1;
+			int IOPL : 2; int NT : 1; int : 1; int RF : 1;
+			int VM : 1; int : 6; int : 8;
 		};
 		int eflags;
 	};
+	struct {
+		uint16_t limit;
+		uint32_t base;
+	} gdtr;
+	union {
+		struct {
+			int PE : 1;
+			int MP : 1;
+			int EM : 1;
+			int TS : 1;
+			int ET : 1;
+            int : 26;
+			int PG : 1;
+		};
+		int val;
+	} CR0;
+	union {
+		union {
+			uint16_t RPL : 2;
+			uint16_t TI : 1;
+			uint16_t INDEX : 13;
+		} sr[4];
+		struct {
+			uint16_t CS;
+			uint16_t DS;
+			uint16_t ES;
+			uint16_t SS;
+		};
+	};
 	};
 } CPU_state;
+
+ uint16_t cs_limit;
 
 extern CPU_state cpu;
 
@@ -64,5 +94,7 @@ void set_OF(int sec,int fir,bool mark);
 //mark = 0为减法
 void set_6F(int sec,int fir,int temp,bool mark);//set OSZAPC F 
 void set_rF(int r);//只传递结果
+
+void init_CR0();
 
 #endif

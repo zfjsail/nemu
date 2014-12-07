@@ -12,6 +12,7 @@ void load_prog();
 void init_dram();
 void init_cache1();
 void init_cache2();
+void init_CRO();
 
 char assembly[40];
 jmp_buf jbuf;	/* Make it easy to perform exception handling */
@@ -20,6 +21,8 @@ extern uint8_t loader [];
 extern uint32_t loader_len;
 
 extern int quiet;
+
+extern uint16_t cs_limit;
 
 extern int isBreak;//触发断点的标志
 
@@ -31,30 +34,19 @@ void restart() {
 	cpu.eip = LOADER_START;
 	cpu.ebp = 0;
 	cpu.esp = 0x8000000;
-
-	cpu.N0 = 0;
-	cpu.N1 = 0;
-	cpu.VM = 0;
-	cpu.RF = 0;
-	cpu.N2 = 0;
-	cpu.NT = 0;
-	cpu.IOPL = 0;
-	cpu.OF = 0;
-	cpu.DF = 0;
-	cpu.IF = 0;
-	cpu.TF = 0;
-	cpu.SF = 0;
-	cpu.ZF = 0;
-	cpu.N3 = 0;
-	cpu.AF = 0;
-	cpu.N4 = 0;
-	cpu.PF = 0;
-	cpu.N5 = 1;
-	cpu.CF = 0;
+	cpu.eflags = 2;
 
 	init_dram();
 	init_cache1();
 	init_cache2();
+
+	/* initialize limit of cs in gdt */
+//	printf("%x\n",cpu.gdtr.base);
+//	uint16_t *cs_limit =(void *)(0x90901700 + 64);
+//	*cs_limit = 0xffff;
+	cs_limit = 0xffff;//can't modify memory in 0x90901700
+
+//	*cs_limit = 0xffff;//other bits are initialized by 0
 }
 
 static void print_bin_instr(swaddr_t eip, int len) {

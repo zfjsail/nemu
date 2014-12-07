@@ -23,7 +23,7 @@ helper_fun opcode_table [256] = {
 /* 0x2c */	inv, inv, inv, inv, 
 /* 0x30 */	inv, xor_r_l, inv, inv, 
 /* 0x34 */	inv, inv, inv, inv,
-/* 0x38 */	cmp_r2r_b, cmp_r2r_v, inv, cmp_m2r_l, 
+/* 0x38 */	cmp_r2r_b, cmp_r2r_v, inv, cmp_rm2r_v, 
 /* 0x3c */	inv, inv, inv, inv, 
 /* 0x40 */	inc_r_v, inc_r_v, inc_r_v, inc_r_v, 
 /* 0x44 */	inc_r_v, inc_r_v, inc_r_v, inc_r_v,
@@ -67,7 +67,7 @@ helper_fun opcode_table [256] = {
 /* 0xdc */	inv, inv, inv, inv,
 /* 0xe0 */	inv, inv, inv, inv,
 /* 0xe4 */	inv, inv, inv, inv,
-/* 0xe8 */	call_i_l, jmp_l, inv, jmp_b,
+/* 0xe8 */	call_i_l, jmp_l, ljmp, jmp_b,
 /* 0xec */	inv, inv, inv, inv,
 /* 0xf0 */	inv, inv, inv, inv,
 /* 0xf4 */	inv, inv, inv, imd_l,
@@ -76,7 +76,7 @@ helper_fun opcode_table [256] = {
 };
 
 helper_fun op_plus_table[256] = {
-/* 0x00 */	inv, inv, inv, inv, 
+/* 0x00 */	inv, lgdt_v, inv, inv, 
 /* 0x04 */	inv, inv, inv, inv, 
 /* 0x08 */	inv, inv, inv, inv, 
 /* 0x0c */	inv, inv, inv, inv, 
@@ -84,7 +84,7 @@ helper_fun op_plus_table[256] = {
 /* 0x14 */	inv, inv, inv, inv, 
 /* 0x18 */	inv, inv, inv, inv, 
 /* 0x1c */	inv, inv, inv, inv, 
-/* 0x20 */	inv, inv, inv, inv, 
+/* 0x20 */	mov_cr2gr_v, inv, mov_gr2cr_v, inv, 
 /* 0x24 */	inv, inv, inv, inv,
 /* 0x28 */	inv, inv, inv, inv, 
 /* 0x2c */	inv, inv, inv, inv, 

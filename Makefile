@@ -28,7 +28,7 @@ nemu: $(OBJS)
 $(TEST_FILE_LIST):
 	cd `dirname $@` && make
 
-LOADER_DIR = myloader
+LOADER_DIR = kernel
 
 loader:
 	cd $(LOADER_DIR) && make

@@ -2,7 +2,7 @@
 #define __ARITH_H__
 
 make_helper(cmp_add_l);
-make_helper(cmp_m2r_l);
+make_helper(cmp_rm2r_v);
 make_helper(cmp_r2r_b);
 make_helper(cmp_i2m_b);
 make_helper(cmp_r2r_v);

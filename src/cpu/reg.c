@@ -117,3 +117,7 @@ void set_rF(int r){//只传递结果
 	set_ZF(r);
 	set_PF(r);
 }
+
+void init_CR0() {
+	cpu.CR0.PE = 0;
+}

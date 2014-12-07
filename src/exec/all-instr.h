@@ -6,5 +6,6 @@
 #include "logic/logic.h"
 #include "ct/ct.h"
 #include "arith/arith.h"
+#include "system/stm.h"
 
 #include "misc/misc.h"

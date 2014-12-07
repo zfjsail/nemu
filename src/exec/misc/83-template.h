@@ -32,6 +32,15 @@ make_helper(concat(mis_i2rm_,SUFFIX)){//i8
 			print_asm("and" " $0x%x,%%%s",sec,regsl[m.R_M]);
 			return 3;
 		}
+		else if(m.opcode == 1) {//or
+			REG(m.R_M) = fir | sec;
+			cpu.OF = 0;
+			cpu.CF = 0;
+			set_rF(fir);
+
+			print_asm("or" " $0x%x,%%%s",sec,REG_NAME(m.R_M));
+			return 3;
+		}
 		else if(m.opcode == 0){//add
 			temp = fir + sec;
 			reg_l(m.R_M) = temp;
@@ -52,6 +61,15 @@ make_helper(concat(mis_i2rm_,SUFFIX)){//i8
 			set_6F(sec,fir,temp,1);
 
 			print_asm("add" str(SUFFIX) " $0x%x,%s",sec,ModR_M_asm);
+			return len + 2;
+		}
+		else if(m.opcode == 1) {//or
+			temp = fir | sec;
+			MEM_W(addr,temp);
+			cpu.OF = 0;
+			cpu.CF = 0;
+			set_rF(temp);
+			print_asm("or" str(SUFFIX) " $0x%x,%s",sec,ModR_M_asm);
 			return len + 2;
 		}
 		else if(m.opcode == 5){//sub

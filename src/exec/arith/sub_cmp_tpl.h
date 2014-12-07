@@ -111,6 +111,30 @@ make_helper(concat(cmp_r2r_,SUFFIX)){
 	}
 }
 
+make_helper(concat(cmp_rm2r_,SUFFIX)) {
+	DATA_TYPE fir,sec;
+	ModR_M m;
+	DATA_TYPE temp;
+	m.val = instr_fetch(eip+1,1);
+	fir = REG(m.reg);
+	if(m.mod == 3) {
+	    sec = REG(m.R_M);
+		temp = fir - sec;
+		set_6F(sec,fir,temp,0);
+		print_asm("cmp" " %%%s,%%%s",REG_NAME(m.R_M),REG_NAME(m.reg));
+		return 2;
+	}
+	else {
+	    swaddr_t addr;
+		int len = read_ModR_M(eip + 1,&addr);
+		sec = MEM_R(addr);
+		print_asm("cmp" str(SUFFIX) " %s,%%%s",ModR_M_asm,REG_NAME(m.reg));
+		temp = fir - sec;
+		set_6F(sec,fir,temp,0);
+		return len + 1;
+	}
+}
+
 make_helper(concat(dec_r_,SUFFIX)){
 	DATA_TYPE fir;
 	int pre_CF = cpu.CF;

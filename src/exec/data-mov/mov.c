@@ -83,3 +83,11 @@ make_helper(mov_z_bl){
 make_helper(mov_zw_v){
 	return mov_zw_l(eip);
 }
+
+make_helper(mov_cr2gr_v) {
+	return mov_cr2gr_l(eip);
+}
+
+make_helper(mov_gr2cr_v) {
+	return mov_gr2cr_l(eip);
+}
