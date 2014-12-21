@@ -12,4 +12,8 @@ make_helper(xor_r_l);
 
 make_helper(or_r_l);
 
+make_helper(and_r2i_v);
+make_helper(or_r2i_v);
+make_helper(test_rm2r_v);
+
 #endif

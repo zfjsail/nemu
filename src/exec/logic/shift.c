@@ -19,7 +19,21 @@ make_helper(sft_rl_b){
 			print_asm("sar" " $0x%x,%%%s",temp,regsl[m.R_M]);
 			return 3;
 		}
+		else if(m.opcode == 5) {
+			uint32_t temp = count;
+			while(count != 0) {
+				cpu.CF = reg_l(m.R_M) & 0x1;
+				reg_l(m.R_M) >>= 1;
+				count--;
+			}
+			if(temp == 1) 
+				cpu.OF = reg_l(m.R_M) >> 31;
+		    set_rF(reg_l(m.R_M));
+			print_asm("shr" " $0x%x,%%%s",temp,regsl[m.R_M]);
+			return 3;
+		}
 		else if(m.opcode == 4){
+			uint32_t temp = count;
 			while(count != 0){
 				cpu.CF = reg_l(m.R_M) >> 31;
 				reg_l(m.R_M) <<= 1;

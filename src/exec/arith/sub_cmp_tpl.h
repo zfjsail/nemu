@@ -2,6 +2,67 @@
 #include "cpu/modrm.h"
 #include "exec/template-start.h"
 
+make_helper(concat(cmp_add_,SUFFIX)) {
+	DATA_TYPE fir,sec;
+	ModR_M m;
+	DATA_TYPE temp;
+	m.val = instr_fetch(eip+1,1);
+	if(m.mod == 3) {
+			fir = REG(m.R_M);
+			sec = MEM_R(eip+2);
+		if(m.opcode == 0) {//add
+			REG(m.R_M) = fir + sec;
+			temp = REG(m.R_M);
+			set_6F(sec,fir,temp,1);
+			print_asm("add" " $0x%x,%%%s",sec,REG_NAME(m.R_M));
+			return 6;
+		}
+		else if(m.opcode == 4) {//and
+			REG(m.R_M) = fir & sec;
+			temp = REG(m.R_M);
+			cpu.CF = 0;
+			cpu.OF = 0;
+			set_rF(temp);
+			print_asm("and" " $0x%x,%%%s",sec,REG_NAME(m.R_M));
+			return 6;
+		}
+		else if(m.opcode == 5) {//sub
+			REG(m.R_M) = fir - sec;
+			temp = REG(m.R_M);
+			set_6F(sec,fir,temp,0);
+			print_asm("sub" " $0x%x,%%%s",sec,REG_NAME(m.R_M));
+			return 6;
+		}
+		else if(m.opcode == 7) {//cmp
+			temp = fir - sec;
+			set_6F(sec,fir,temp,0);
+			print_asm("cmp" " $0x%x,%%%s",sec,REG_NAME(m.R_M));
+			return 6;
+		}
+		else return 0;//inv
+	}
+	else {
+		swaddr_t addr;
+		int len = read_ModR_M(eip + 1,&addr);
+		fir = MEM_R(addr);
+		sec = MEM_R(eip + 1 + len);//guess
+		if(m.opcode == 5) {//sub
+			temp = fir - sec;
+			MEM_W(addr,temp);
+			set_6F(sec,fir,temp,0);
+			print_asm("sub" str(SUFFIX) " $0x%x,%s",sec,ModR_M_asm);
+			return len + 5;
+		}
+		else if(m.opcode == 7) {//cmp
+			temp = fir - sec;
+			set_6F(sec,fir,temp,0);
+			print_asm("cmp" str(SUFFIX) " $0x%x,%s",sec,ModR_M_asm);
+			return len + 5;
+		}
+		else return 0;//inv
+	}
+}
+
 /*
 make_helper(cmp_add_l){
 	ModR_M m;
@@ -244,4 +305,15 @@ make_helper(sbb_r2r_l){
 	else return 0;//inv
 }
 */
+
+make_helper(concat(cmp_a2i_,SUFFIX)) {
+	DATA_TYPE fir,sec;
+	DATA_TYPE temp;
+	fir = REG(R_EAX);
+	sec = instr_fetch(eip + 1, sizeof(DATA_TYPE));
+	temp = fir - sec;
+	set_6F(sec,fir,temp,0);
+	print_asm("cmp" " $0x%x,%%%s",sec,REG_NAME(R_EAX));
+	return 1 + sizeof(DATA_TYPE);
+}
 #include "exec/template-end.h"

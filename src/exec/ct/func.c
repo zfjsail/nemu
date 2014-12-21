@@ -3,7 +3,7 @@
 
 make_helper(call_i_l){
 	int imm;
-	imm = instr_fetch(eip+1,4);
+	imm = swaddr_read(eip+1,4);
 	cpu.esp -= 4;
 	swaddr_write(cpu.esp,4,cpu.eip+5);
 	cpu.eip += imm;
@@ -16,4 +16,12 @@ make_helper(ret){
 	cpu.esp += 4;
 	print_asm("ret");
 	return 1;
+}
+
+make_helper(ret_iw) {//32
+	uint16_t data_byte = instr_fetch(eip + 1, 2);
+	cpu.eip = swaddr_read(cpu.esp,data_byte) - 3;
+	cpu.esp += data_byte;
+	print_asm("ret" " 0x%x",data_byte);
+	return 3;
 }

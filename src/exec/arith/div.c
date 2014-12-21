@@ -1,5 +1,6 @@
 #include "exec/helper.h"
 #include "cpu/modrm.h"
+#include "cpu/reg.h"
 
 make_helper(imd_l){//imul or idiv
 	ModR_M m;
@@ -20,7 +21,26 @@ make_helper(imd_l){//imul or idiv
 		return 3;
 	}
 	else if(m.mod == 3){
-		if(m.opcode == 5){
+		if(m.opcode == 0) {//test
+			uint32_t temp = instr_fetch(eip + 2, 4);
+			uint32_t result = temp & reg_l(m.R_M);
+			cpu.CF = 0;
+			cpu.OF = 0;
+
+			set_rF(result);
+			print_asm("test" " 0x%x,%%%s", temp, regsl[m.R_M]);
+			return 6;
+		}
+		else if(m.opcode == 3) {
+			if(reg_l(m.R_M)) cpu.CF = 1;
+			else cpu.CF = 0;
+			reg_l(m.R_M) = - reg_l(m.R_M);
+			set_rF(reg_l(m.R_M));
+			set_OF(-reg_l(m.R_M),0,0);
+			print_asm("neg" " %%%s",regsl[m.R_M]);
+			return 2;
+		}
+	    else if(m.opcode == 5){
 			long long fir = (int)reg_l(m.R_M);
 			long long sec = (int)cpu.eax;
 			long long r = fir * sec;

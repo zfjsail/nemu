@@ -91,6 +91,16 @@ make_helper(jb_b){
 	return 2;
 }
 
+make_helper(jae_b) {
+	int imm;
+	imm = (char)instr_fetch(eip+1,1);
+	int temp = cpu.eip + imm;
+	if(!cpu.CF) 
+		cpu.eip += imm;
+	print_asm("jae" " %x ",temp + 2);
+	return 2;
+}
+
 make_helper(jle_l){
 	if(cpu.ZF || cpu.SF != cpu.OF){
 		int imm;
@@ -128,5 +138,16 @@ make_helper(je_l){
 		cpu.eip += imm;
 	}
 	print_asm("je" " %x <main+0x%x>",cpu.eip+6,cpu.eip+6-0x100000);
+	return 6;
+}
+
+make_helper(jg_l) {
+	int imm;
+	imm = instr_fetch(eip+2,4);
+	int temp = cpu.eip + imm;
+	if(!cpu.ZF && cpu.SF == cpu.OF) {
+		cpu.eip += imm;
+	}
+	print_asm("jg" " %x ",temp + 6);
 	return 6;
 }

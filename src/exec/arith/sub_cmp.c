@@ -15,6 +15,11 @@
 
 extern char suffix;
 
+make_helper(cmp_add_v) {
+	return (suffix == 'l' ? cmp_add_l(eip) : cmp_add_w(eip));
+}
+
+/*
 make_helper(cmp_add_l){
 	ModR_M m;
 	int temp;
@@ -45,10 +50,30 @@ make_helper(cmp_add_l){
 			print_asm("add" " $0x%x,%%%s",sec,regsl[m.R_M]);
 			return 6;
 		}
+		else if(m.opcode == 4) {//and
+			int fir = reg_l(m.R_M);
+			int sec = instr_fetch(eip+2,4);
+			reg_l(m.R_M) = fir & sec;
+			temp = reg_l(m.R_M);
+			cpu.CF = 0;
+			cpu.OF = 0;
+			set_rF(temp);
+			print_asm("and" " $0x%x,%%%s",sec,regsl[m.R_M]);
+			return 6;
+		}
+		else if(m.opcode == 5) {//sub
+			int fir = reg_l(m.R_M);
+			int sec = instr_fetch(eip+2,4);
+			reg_l(m.R_M) = fir - sec;
+			set_6F(sec,fir,reg_l(m.R_M),0);
+			print_asm("sub" " $0x%x,%%%s",sec,regsl[m.R_M]);
+			return 6;
+		}
 		else return 0;//inv
 	}
 	else return 0;//inv
 }
+*/
 
 /*
 make_helper(cmp_m2r_l){
@@ -218,4 +243,8 @@ make_helper(sbb_r2r_l){
 
 make_helper(dec_r_v){
 	return (suffix == 'l' ? dec_r_l(eip) : dec_r_w(eip));
+}
+
+make_helper(cmp_a2i_v) {
+	return (suffix == 'l' ? cmp_a2i_l(eip) : cmp_a2i_w(eip));
 }

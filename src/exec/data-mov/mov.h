@@ -21,4 +21,5 @@ make_helper(mov_zw_l);
 
 make_helper(mov_cr2gr_v);
 make_helper(mov_gr2cr_v);
+make_helper(mov_rm2sr_v);
 #endif

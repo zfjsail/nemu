@@ -14,14 +14,17 @@ make_helper(jge_b);
 make_helper(jg_b);
 make_helper(ja_b);
 make_helper(jb_b);
+make_helper(jae_b);
 make_helper(jle_l);
 make_helper(jbe_l);
 make_helper(jl_l);
 make_helper(je_l);
+make_helper(jg_l);
 
 make_helper(op_plus_l);
 
 make_helper(call_i_l);
 make_helper(ret);
+make_helper(ret_iw);
 
 #endif

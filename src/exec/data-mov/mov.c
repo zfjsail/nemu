@@ -91,3 +91,7 @@ make_helper(mov_cr2gr_v) {
 make_helper(mov_gr2cr_v) {
 	return mov_gr2cr_l(eip);
 }
+
+make_helper(mov_rm2sr_v) {
+	return mov_rm2sr_w(eip);
+}

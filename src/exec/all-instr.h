@@ -7,5 +7,6 @@
 #include "ct/ct.h"
 #include "arith/arith.h"
 #include "system/stm.h"
+#include "rep/rep.h"
 
 #include "misc/misc.h"

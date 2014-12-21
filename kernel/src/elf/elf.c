@@ -1,4 +1,5 @@
 #include "common.h"
+#include "x86.h"
 #include "memory.h"
 #include <string.h>
 
@@ -13,6 +14,8 @@
 void ide_read(uint8_t *, uint32_t, uint32_t);
 void create_video_mapping();
 uint32_t get_ucr3();
+
+//static PTE uptable[PHY_MEM / PAGE_SIZE];
 
 uint32_t loader() {
 	Elf32_Ehdr *elf = (void *)0;;
@@ -30,12 +33,17 @@ uint32_t loader() {
 	/* Load each program segment */
 //	nemu_assert(0);
 	int i;
+//	uint32_t vaddr;
 	for(i = 0; i < elf -> e_phnum; i++) {
 		/* Scan the program header table, load each segment into memory */
 		if(ph->p_type == PT_LOAD) {
 			int j;
-			for(j = 0; j< ph -> p_filesz; j++)
-				*((char *)(ph -> p_vaddr + j)) = *((char *)(ph -> p_offset + j));
+//			vaddr = ph -> p_vaddr - 0xc0100000 + 0x8048000;
+//			uint32_t hwaddr = mm_malloc(vaddr,ph -> p_memsz);
+			uint32_t hwaddr = mm_malloc(ph -> p_vaddr, ph -> p_memsz);
+
+			for(j = 0; j < ph -> p_filesz; j++) 
+				*((char *)(hwaddr + j)) = *((char *)(ph -> p_offset + j));
 
 			/* TODO: read the content of the segment from the ELF file 
 			 * to the memory region [VirtAddr, VirtAddr + FileSiz)
@@ -46,8 +54,8 @@ uint32_t loader() {
 			 * [VirtAddr + FileSiz, VirtAddr + MemSiz)
 			 */
 			int k;
-			for(k = 0; k < (ph -> p_memsz - ph -> p_filesz); k++)
-				*((char *)(ph -> p_vaddr + ph -> p_filesz + k)) = (char)0;
+			for(k = ph -> p_filesz; k < ph -> p_memsz; k++)
+				*((char *)(hwaddr + k)) = (char)0;
 
 			/* Record the prgram break for future use. */
 			extern uint32_t brk;
@@ -58,9 +66,9 @@ uint32_t loader() {
 	}
 
 	volatile uint32_t entry = elf->e_entry;
-	((void(*)(void)) entry)();
+//	((void(*)(void)) entry)();
 
-	HIT_GOOD_TRAP;
+//	HIT_GOOD_TRAP;
 
 #ifdef IA32_PAGE
 	mm_malloc(KOFFSET - STACK_SIZE, STACK_SIZE);

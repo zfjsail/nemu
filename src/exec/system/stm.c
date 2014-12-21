@@ -27,9 +27,15 @@ make_helper(lgdt_v) {
 make_helper(ljmp) {
 	if(cpu.CR0.PE) {//VM is doubtful...
 	    cpu.eip = swaddr_read(eip + 1,4) - 7;
-		cpu.CS = swaddr_read(eip + 5,2);
-		print_asm("ljmp" " $0x%x,$0x%x",cpu.CS,cpu.eip + 7);
+		cpu.sreg[1] = swaddr_read(eip + 5,2);
+		print_asm("ljmp" " $0x%x,$0x%x",cpu.sreg[1],cpu.eip + 7);
 		return 7;
 	}
 	else return 0;//inv
+}
+
+make_helper(cld) {
+	cpu.DF = 0;
+	print_asm("cld");
+	return 1;
 }

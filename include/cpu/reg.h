@@ -42,33 +42,53 @@ typedef union {
 	} gdtr;
 	union {
 		struct {
-			int PE : 1;
-			int MP : 1;
-			int EM : 1;
-			int TS : 1;
-			int ET : 1;
-            int : 26;
-			int PG : 1;
+			uint32_t PE : 1;
+			uint32_t MP : 1;
+			uint32_t EM : 1;
+			uint32_t TS : 1;
+			uint32_t ET : 1;
+            uint32_t : 26;
+			uint32_t PG : 1;
 		};
-		int val;
+		uint32_t val;
 	} CR0;
 	union {
-		union {
+		struct {
+			uint32_t pad0 : 3;
+			uint32_t page_write_through : 1;
+			uint32_t page_cache_disable : 1;
+			uint32_t pad1 : 7;
+			uint32_t page_directory_base : 20;
+		};
+		uint32_t val;
+	} CR3;
+	union {
+		struct {
 			uint16_t RPL : 2;
 			uint16_t TI : 1;
 			uint16_t INDEX : 13;
 		} sr[4];
+/*
 		struct {
-			uint16_t CS;
-			uint16_t DS;
 			uint16_t ES;
+			uint16_t CS;
 			uint16_t SS;
+			uint16_t DS;
+*/
+	    uint16_t sreg[4];
 		};
-	};
 	};
 } CPU_state;
 
- uint16_t cs_limit;
+//uint16_t cs_limit;
+
+struct SG_cache {
+	uint32_t base;
+	uint32_t limit;
+	bool privilege;
+} seg_cache[4];
+
+uint8_t current_sreg;
 
 extern CPU_state cpu;
 

@@ -30,4 +30,6 @@
 #define MEM_R(addr) swaddr_read(addr, DATA_BYTE)
 #define MEM_W(addr, data) swaddr_write(addr, DATA_BYTE, data)
 
+extern char *regseg[4];
+
 #define MSB(n) ((DATA_TYPE)(n) >> ((DATA_BYTE << 3) - 1))

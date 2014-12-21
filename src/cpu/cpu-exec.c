@@ -13,6 +13,7 @@ void init_dram();
 void init_cache1();
 void init_cache2();
 void init_CRO();
+void init_TLB();
 
 char assembly[40];
 jmp_buf jbuf;	/* Make it easy to perform exception handling */
@@ -22,7 +23,7 @@ extern uint32_t loader_len;
 
 extern int quiet;
 
-extern uint16_t cs_limit;
+extern struct SG_cache seg_cache[4];
 
 extern int isBreak;//触发断点的标志
 
@@ -39,12 +40,13 @@ void restart() {
 	init_dram();
 	init_cache1();
 	init_cache2();
+	init_TLB();
 
 	/* initialize limit of cs in gdt */
 //	printf("%x\n",cpu.gdtr.base);
 //	uint16_t *cs_limit =(void *)(0x90901700 + 64);
 //	*cs_limit = 0xffff;
-	cs_limit = 0xffff;//can't modify memory in 0x90901700
+	seg_cache[1].limit = 0xffffffff;//can't modify memory in 0x90901700
 
 //	*cs_limit = 0xffff;//other bits are initialized by 0
 }

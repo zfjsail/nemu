@@ -4,9 +4,13 @@
 
 #include "nemu.h"
 
+#include "memory.h"
+
 char ModR_M_asm[MODRM_ASM_BUF_SIZE];
 #define print_ModR_M_asm(...) \
 	assert(snprintf(ModR_M_asm, MODRM_ASM_BUF_SIZE, __VA_ARGS__) < MODRM_ASM_BUF_SIZE )
+
+extern uint8_t current_sreg;
 
 /* For more details about instruction format, please refer to i386 manual. */
 int read_ModR_M(swaddr_t eip, swaddr_t *addr) {
@@ -72,6 +76,13 @@ int read_ModR_M(swaddr_t eip, swaddr_t *addr) {
 		sprintf(index_buf, ",%%%s,%d", regsl[index_reg], 1 << scale); 
 		*addr += reg_l(index_reg) << scale;
 	}
+
+	/* bind DS or SS sreg */
+	if(*addr > 0x40000000) current_sreg = 2;
+	else current_sreg = 3;
+    
+	if(cpu.CR0.PE)
+	    *addr = segment_translate(*addr,current_sreg);
 
 	if(base_reg == -1 && index_reg == -1) {
 		print_ModR_M_asm("%s", disp_buf);

@@ -21,6 +21,7 @@ typedef union {
 	uint32_t addr;
 } dram_addr;
 
+int entercount = 0;
 
 #define NR_COL (1 << COL_WIDTH)
 #define NR_ROW (1 << ROW_WIDTH)
@@ -410,16 +411,155 @@ uint32_t cache1_read(hwaddr_t addr, size_t len){
 	uint32_t set = chaddr.set;
 	uint32_t row = seek_row1(addr);
 	uint32_t off = chaddr.off;
+
+	bool boundary = false;
+	uint8_t temp[8];
+
+	if((addr >> BLOCK_WIDTH) != ((addr + len - 1) >> BLOCK_WIDTH))
+		boundary = true;
+
 //	Log("%d\n",row);
-	if(row == ROW_OF_SET1) {//miss
+	if(row == ROW_OF_SET1 && !boundary) {//miss
 		row = seek_row2(addr);
 		if(row < ROW_OF_SET2)
 		    return cache2_read(addr,len);
-		else if(isReplace1(addr) < ROW_OF_SET1)
+		else if(isReplace1(addr) < ROW_OF_SET1) {
 			row = read_block1(addr);
+			int i;
+			for (i = 0; i < len; i++) {
+			    temp[i] = cache1[set][row].block[off+i];
+//			    printf("%x ",temp[i]);
+			}
+		}
 		else
 			return cache2_read(addr,len);
 	}
+	else if(row < ROW_OF_SET1 && !boundary) {//hit
+   	    return *(uint32_t *)(cache1[set][row].block + off) & (~0u >> ((4 - len) << 3));
+	}
+	
+	if(boundary) {
+		uint8_t former_len = ((~ addr) & 0xf) + 1;
+		uint32_t row_plus = seek_row1(addr + len - 1);
+		uint32_t *tmp;
+	    if(row == ROW_OF_SET1) {//cache1 miss
+		    row = seek_row2(addr);
+		    if(row < ROW_OF_SET2) {//cache2 hit
+				tmp = (void *)temp;
+		        *tmp =  cache2_read(addr,len);
+				if(row_plus < ROW_OF_SET1) {
+					int i;
+					for(i = former_len; i < len; i++)
+					temp[i] = cache1[set+1][row_plus].block[i-former_len];
+				}
+				else {
+					tmp = (void *)(temp + former_len);
+					row_plus = seek_row2(addr + former_len);
+					if(row_plus < ROW_OF_SET2) {
+						*tmp = cache2_read(addr + former_len,len);
+					}
+					else {
+						row_plus = isReplace1(addr + former_len);
+						if(row_plus < ROW_OF_SET1) {
+							read_block1(addr + former_len);
+							int i;
+							for(i = former_len; i < len; i++)
+								temp[i] = cache1[set+1][row_plus].block[i-former_len];
+						}
+						else
+							*tmp = cache2_read(addr + former_len,len);
+					}
+				}		
+			}		
+		    else if(isReplace1(addr) < ROW_OF_SET1) {
+			    row = read_block1(addr);
+				int i;
+				for(i = 0; i < former_len; i++)
+				temp[i] = cache1[set][row].block[off + i];
+				if(row_plus < ROW_OF_SET1) {
+					int i;
+					for(i = former_len; i < len; i++)
+					temp[i] = cache1[set+1][row_plus].block[i-former_len];
+				}
+				else {
+					tmp = (void *)(temp + former_len);
+					row_plus = seek_row2(addr + former_len);
+					if(row_plus < ROW_OF_SET2) {
+						*tmp = cache2_read(addr + former_len,len);
+					}
+					else {
+						row_plus = isReplace1(addr + former_len);
+						if(row_plus < ROW_OF_SET1) {
+							read_block1(addr + former_len);
+							int i;
+							for(i = former_len; i < len; i++)
+								temp[i] = cache1[set+1][row_plus].block[i-former_len];
+						}
+						else
+							*tmp = cache2_read(addr + former_len,len);
+					}
+				}		
+			}
+		    else {
+			    tmp = (void *)temp;	
+			    *tmp = cache2_read(addr,len);
+				if(row_plus < ROW_OF_SET1) {
+					int i;
+					for(i = former_len; i < len; i++)
+					temp[i] = cache1[set+1][row_plus].block[i-former_len];
+				}
+				else {
+					tmp = (void *)(temp + former_len);
+					row_plus = seek_row2(addr + former_len);
+					if(row_plus < ROW_OF_SET2) {
+						*tmp = cache2_read(addr + former_len,len);
+					}
+					else {
+						row_plus = isReplace1(addr + former_len);
+						if(row_plus < ROW_OF_SET1) {
+							read_block1(addr + former_len);
+							int i;
+							for(i = former_len; i < len; i++)
+								temp[i] = cache1[set+1][row_plus].block[i-former_len];
+						}
+						else
+							*tmp = cache2_read(addr + former_len,len);
+					}
+				}		
+			}
+		}
+		else { //cache1 hit
+			int i;
+			for(i = 0; i < former_len; i++)
+				temp[i] = cache1[set][row].block[off + i];
+			row_plus = seek_row1(addr + former_len);
+			if(row_plus < ROW_OF_SET1) {
+				int j;
+				for(j = former_len; j < len; j++)
+				temp[j] = cache1[set+1][row_plus].block[j-former_len];
+			}
+			else {
+				tmp = (void *)(temp + former_len);
+				row_plus = seek_row2(addr + former_len);
+				if(row_plus < ROW_OF_SET2) {
+					*tmp = cache2_read(addr + former_len,len);
+				}
+				else {
+					entercount += 1;
+					row_plus = isReplace1(addr + former_len);
+					if(row_plus < ROW_OF_SET1) {
+						row_plus = read_block1(addr + former_len);
+						int i;
+						for(i = former_len; i < len; i++)
+							temp[i] = cache1[set+1][row_plus].block[i-former_len];
+					}
+					else
+						*tmp = cache2_read(addr + former_len,len);
+				}
+			}		
+		}
+	}
+		
 /*
 		ccount += 198;
 		if((row = isReplace1(addr)) == 8) row = rand() % 8;
@@ -443,7 +583,11 @@ uint32_t cache1_read(hwaddr_t addr, size_t len){
 	}
 */
 	ccount += 2;
-	return *(uint32_t *)(cache1[set][row].block + off) & (~0u >> ((4 - len) << 3));
+//    printf("......%x\n", *(uint32_t *)(cache1[set][row].block + off) & (~0u >> ((4 - len) << 3)));
+//	printf("..........%x\n",*(uint32_t *)temp & (~0u >> ((4 - len) << 3)));
+//	printf("...............%x %x %x %x \n",temp[0],temp[1],temp[2],temp[3]);
+//	return *(uint32_t *)(cache1[set][row].block + off) & (~0u >> ((4 - len) << 3));
+	return (*(uint32_t *)temp) & (~0u >> ((4 - len) << 3));
 }
 
 uint32_t cache2_read(hwaddr_t addr, size_t len) {
@@ -464,3 +608,45 @@ uint32_t cache2_read(hwaddr_t addr, size_t len) {
 
 	return *(uint32_t *)(cache2[set][row].block + off) & (~0u >> ((4 - len) << 3));
 }
+
+/* TLB */
+typedef struct {
+	uint64_t vp : 20;
+	uint64_t pp : 20;
+	uint64_t valid : 1;
+} TLB_unit;
+
+#define TLB_SZ 64
+
+
+TLB_unit TLB[TLB_SZ];
+
+void init_TLB() {
+	int i;
+	for(i = 0; i < TLB_SZ; i++)
+		TLB[i].valid = 0;
+}
+
+int seek_TLB() {
+	int i;
+	for(i = 0; i < TLB_SZ; i++)
+		if(!TLB[i].valid) return i;
+	return -1;//need replace
+}
+
+void TLB_write(uint32_t vp,uint32_t pp) {
+	int i = seek_TLB();
+	if(i < 0) i = rand() % TLB_SZ;
+	TLB[i].vp = vp;
+	TLB[i].pp = pp;
+	TLB[i].valid = 1;
+}
+
+int TLB_read(uint32_t vp) {
+	int i;
+	for(i = 0; i < TLB_SZ; i++) 
+		if(TLB[i].valid && TLB[i].vp == vp)
+			return TLB[i].pp;
+	return -1;
+}
+

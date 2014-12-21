@@ -1,11 +1,12 @@
 #ifndef __ARITH_H__
 #define __ARITH_H__
 
-make_helper(cmp_add_l);
+make_helper(cmp_add_v);
 make_helper(cmp_rm2r_v);
 make_helper(cmp_r2r_b);
 make_helper(cmp_i2m_b);
 make_helper(cmp_r2r_v);
+make_helper(cmp_a2i_v);
 make_helper(sub_r2r_l);
 make_helper(sub_r2m_l);
 make_helper(sbb_r2r_l);
