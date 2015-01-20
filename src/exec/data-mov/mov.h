@@ -18,8 +18,12 @@ make_helper(mov_moffs2a_v);
 make_helper(mov_s_bl);
 make_helper(mov_zb_v);
 make_helper(mov_zw_l);
+make_helper(mov_rm2r_swv);
 
 make_helper(mov_cr2gr_v);
 make_helper(mov_gr2cr_v);
 make_helper(mov_rm2sr_v);
+
+make_helper(cmove_rm2r_v);
+make_helper(cmova_rm2r_v);
 #endif

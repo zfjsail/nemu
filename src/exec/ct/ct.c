@@ -101,6 +101,15 @@ make_helper(jae_b) {
 	return 2;
 }
 
+make_helper(js_b) {
+	int imm = (char)instr_fetch(eip + 1, 1);
+	int temp = cpu.eip + imm;
+	if(cpu.SF)
+		cpu.eip = temp;
+	print_asm("js" " %x",temp + 2);
+	return 2;
+}
+
 make_helper(jle_l){
 	if(cpu.ZF || cpu.SF != cpu.OF){
 		int imm;
@@ -149,5 +158,34 @@ make_helper(jg_l) {
 		cpu.eip += imm;
 	}
 	print_asm("jg" " %x ",temp + 6);
+	return 6;
+}
+
+make_helper(js_l) {
+	int imm;
+	imm = instr_fetch(eip + 2, 4);
+	int temp = cpu.eip + imm;
+	if(cpu.SF)
+		cpu.eip += imm;
+	print_asm("js" " %x ",temp + 6);
+	return 6;
+}
+
+make_helper(jne_l) {
+	int imm;
+	imm = instr_fetch(eip + 2, 4);
+	int temp = cpu.eip + imm;
+	if(!cpu.ZF)
+		cpu.eip = temp;
+	print_asm("jne" " %x", temp + 6);
+	return 6;
+}
+
+make_helper(ja_l) {
+	int imm = instr_fetch(eip + 2, 4);
+	int temp = cpu.eip + imm;
+	if(!cpu.CF && !cpu.ZF)
+		cpu.eip = temp;
+	print_asm("je" " %x", temp + 6);
 	return 6;
 }

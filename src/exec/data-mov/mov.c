@@ -84,6 +84,10 @@ make_helper(mov_zw_v){
 	return mov_zw_l(eip);
 }
 
+make_helper(mov_rm2r_swv) {
+	return mov_rm2r_swl(eip);
+}
+
 make_helper(mov_cr2gr_v) {
 	return mov_cr2gr_l(eip);
 }
@@ -94,4 +98,12 @@ make_helper(mov_gr2cr_v) {
 
 make_helper(mov_rm2sr_v) {
 	return mov_rm2sr_w(eip);
+}
+
+make_helper(cmove_rm2r_v) {
+	return (suffix == 'l' ? cmove_rm2r_l(eip) : cmove_rm2r_w(eip));
+}
+
+make_helper(cmova_rm2r_v) {
+	return (suffix == 'l' ? cmova_rm2r_l(eip) : cmova_rm2r_w(eip));
 }

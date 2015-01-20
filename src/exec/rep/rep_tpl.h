@@ -3,6 +3,8 @@
 #include "cpu/reg.h"
 #include "exec/template-start.h"
 
+void lnaddr_write(lnaddr_t addr,size_t len,uint32_t data);
+
 make_helper(concat(rep_,SUFFIX)) {
 	uint8_t op;
 	op = instr_fetch(eip + 1, 1);
@@ -68,7 +70,7 @@ make_helper(concat(rep_,SUFFIX)) {
 		int i = REG(R_ECX);
 		while(i != 0) {
 			lnaddr_t desaddr = seg_cache[0].base + REG(R_EDI);//ES
-			MEM_W(desaddr,REG(R_EAX));
+			lnaddr_write(desaddr,sizeof(REG(R_EAX)),REG(R_EAX));
 			int off = sizeof(REG(R_EAX));
 			if(cpu.DF) REG(R_EDI) -= off;
 			else REG(R_EDI) += off;

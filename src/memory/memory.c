@@ -1,6 +1,9 @@
 #include "common.h"
 #include "cpu/reg.h"
 #include "memory.h"
+#include <setjmp.h>
+
+extern jmp_buf jbuf;
 
 uint32_t dram_read(hwaddr_t addr, size_t len);
 void dram_write(hwaddr_t addr, size_t len, uint32_t data);
@@ -36,7 +39,10 @@ hwaddr_t page_translate(lnaddr_t addr) {
 	    PDE *pfir = (void *)((uint32_t)kpdir + 4 * pgaddr.dir);// *4?
 	    PDE fir;
 	    fir.val = dram_read((uint32_t)pfir,4);
-	    if(!fir.present) assert(0);
+	    if(!fir.present) {
+			assert(0);
+			printf("eip = 0x%x\n",cpu.eip);
+		}
 	    PTE *psec = (void *)((fir.page_frame << 12) + 4 * pgaddr.page);// *4?
 	    PTE sec;
 	    sec.val = dram_read((uint32_t)psec,4);
@@ -145,4 +151,23 @@ hwaddr_t addr_trans(swaddr_t addr) {
 		hwaddr = page_translate(lnaddr);
 	else hwaddr = lnaddr;
 	return hwaddr;
+}
+
+void raise_intr(uint8_t NO) {
+	uint32_t in_idt = cpu.idtr.base;
+	in_idt += 8 * NO;
+	uint16_t segment = lnaddr_read(in_idt + 2,4);
+	cpu.sreg[1] = segment;//CS
+	uint32_t in_gdt = cpu.gdtr.base + (cpu.sr[1].INDEX << 3);
+	uint32_t up = lnaddr_read(in_gdt + 4, 4);
+	uint32_t low = lnaddr_read(in_gdt,4);
+	uint32_t base = (up & 0xff000000) + ((up & 0xff) << 16) + (low >> 16);
+	seg_cache[1].base = base;
+	seg_cache[1].limit = 0xffffffff;
+	uint16_t off_15_0 = lnaddr_read(in_idt,2);
+	uint16_t off_31_16 = lnaddr_read(in_idt + 6, 2);
+	uint32_t off = (off_31_16 << 16) + off_15_0;
+	cpu.eip = base + off;
+	
+	longjmp(jbuf,1);
 }

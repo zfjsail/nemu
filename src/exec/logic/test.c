@@ -35,3 +35,17 @@ make_helper(test_r2r_b){
 	}
 	else return 0;//inv
 }
+
+/*
+make_helper(test_i2a_b) {
+	uint8_t temp, fir, sec;
+	fir = reg_b(R_EAX);
+	sec = instr_fetch(eip + 1, 1);
+	temp = fir & sec;
+	cpu.CF = 0;
+	cpu.OF = 0;
+	set_rF(temp);
+	print_asm("test" " $0x%x,%%%s",sec,regsb[R_EAX]);
+	return 2;
+}
+*/

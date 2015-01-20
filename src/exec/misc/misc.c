@@ -1,5 +1,6 @@
 #include "exec/helper.h"
 #include "cpu/modrm.h"
+#include <unistd.h>
 
 #include "ui/ui.h"
 
@@ -19,6 +20,8 @@
 
 extern uint64_t ccount;
 extern bool t[12];
+
+const char ctest[] = "Hello world!\n";
 
 make_helper(inv) {
 	/* invalid opcode */
@@ -43,6 +46,29 @@ make_helper(int3) {
 }
 
 make_helper(nemu_trap) {
+
+    if(cpu.eax == 2) {
+//		uint32_t addr = addr_trans(cpu.ecx);
+//		uint32_t testaddr = addr_trans((swaddr_t)ctest);
+//		printf("%x,%x\n",addr,cpu.ecx);
+//		printf("%x\n",(unsigned)ctest);
+		uint32_t temp = cpu.ecx, i;
+		char char_temp = swaddr_read(temp, 1);
+		for(i = 0; char_temp != '\0'; i ++) {
+		 printf("%c",char_temp);
+		 char_temp = swaddr_read(++temp, 1);
+		}
+//		printf("\n");
+		cpu.eax = i + 1;
+//		write(1,(void *)0x8048074,1);
+//      write(1,(void *)ctest,cpu.edx);
+//		write(1,(void *)0x8048098,cpu.edx);
+//		printf("ctest = %x\n",(unsigned)ctest);
+//		printf("%s\n",(char *)0x1000094);
+//		cpu.eax = write(1,(char *)addr,cpu.edx);
+//		printf("%s",(char *)cpu.ecx);
+	}
+    else {
 	printf("nemu: HIT \33[1;31m%s\33[0m TRAP at eip = 0x%08x\n\n", (cpu.eax == 0 ? "GOOD" : "BAD"), cpu.eip);
 	nemu_state = END;
 /*
@@ -52,6 +78,7 @@ make_helper(nemu_trap) {
 	printf("\n");
 */
 	print_asm("nemu trap");
+	}
 	return 1;
 }
 

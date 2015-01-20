@@ -70,6 +70,7 @@ void init_cond() {
 #ifdef IA32_PAGE
 	/* Set the %esp for user program, which is one of the
 	 * convention of the "advanced" runtime environment. */
+//	asm volatile("movl %0,%%esp" : : "i"(0x4000000));
 	asm volatile("movl %0, %%esp" : : "i"(KOFFSET));
 #endif
 
@@ -78,6 +79,8 @@ void init_cond() {
 
 	HIT_GOOD_TRAP;
 }
+
+//volatile int x = 0;
 
 /* Initialization phase 1
  * The assembly code in start.S will finally jump here.
@@ -95,6 +98,7 @@ void init() {
 
 	/* Jump to init_cond() to continue initialization. */
 	asm volatile("jmp *%0" : : "r"(init_cond));
+//    init_cond();
 
 	/* Should never reach here. */
 	nemu_assert(0);

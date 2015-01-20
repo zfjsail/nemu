@@ -47,3 +47,31 @@ make_helper(sft_rl_b){
 	}
 	return 0;//inv
 }
+
+make_helper(sft_cb_rl) {
+	ModR_M m;
+	m.val = instr_fetch(eip + 1, 1);
+	uint8_t count = reg_b(R_CL);
+	uint8_t temp = count;
+	if(m.mod == 3) {
+	    if(m.opcode == 4) {
+		    while(temp != 0) {
+			    cpu.CF = reg_l(m.R_M) >> 31;
+			    reg_l(m.R_M) <<= 1;
+			    temp --;
+		    }
+		    set_rF(reg_l(m.R_M));
+		    print_asm("shl" " %%%s,%%%s",regsb[R_CL],regsl[m.R_M]);
+		    return 2;
+	    }
+	    else {
+		    assert(0);
+		    return 0;
+	    }
+	}
+	else {
+		assert(0);
+		return 0;
+	}
+}
+

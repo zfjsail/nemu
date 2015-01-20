@@ -148,7 +148,7 @@ make_helper(cmp_i2m_b){
 		int disp8 = (char)instr_fetch(eip+2,1);
 		char fir = swaddr_read(bx+disp8,1);
 		char sec = instr_fetch(eip+3,1);
-		if(m.opcode == 7){
+	    if(m.opcode == 7){//cmp
 			temp = fir - sec;
 			set_6F(sec,fir,temp,0);
 			if(disp8 >= 0)
@@ -158,6 +158,30 @@ make_helper(cmp_i2m_b){
 			return 4;
 		}
 		else return 0;//inv
+	}
+	else if(m.mod == 3) {
+		uint8_t sec = instr_fetch(eip + 2, 1);
+		uint8_t fir = reg_b(m.R_M);
+		uint8_t temp;
+		if(m.opcode == 1) {//or
+			temp = fir | sec;
+			reg_b(m.R_M) = temp;
+			cpu.CF = 0;
+			cpu.OF = 0;
+			set_rF(temp);
+			print_asm("orb" " $0x%x,%%%s",sec,regsb[m.R_M]);
+			return 3;
+		}
+		else if(m.opcode == 4) {//and
+			temp = fir & sec;
+			reg_b(m.R_M) = temp;
+			cpu.CF = 0;
+			cpu.OF = 0;
+			set_rF(temp);
+			print_asm("and" " $0x%x,%%%s",sec,regsb[m.R_M]);
+			return 3;
+		}
+		else return 0;
 	}
 	else return 0;//inv
 }
@@ -178,14 +202,25 @@ make_helper(cmp_r2r_l){
 }
 */
 
+make_helper(sub_r2rm_v) {
+	return (suffix == 'l' ? sub_r2rm_l(eip) : sub_r2rm_w(eip));
+}
+
 make_helper(cmp_rm2r_v) {
-	return (suffix == 'l' ? cmp_rm2r_l(eip) : cmp_rm2r_w(eip));
+	switch(suffix) {
+		case 'l' : return cmp_rm2r_l(eip); break;
+		case 'w' : return cmp_rm2r_w(eip); break;
+		case 'b' : return cmp_rm2r_b(eip); break;
+		default : return 0;
+	}
+//	return (suffix == 'l' ? cmp_rm2r_l(eip) : cmp_rm2r_w(eip));
 }
 
 make_helper(cmp_r2r_v){
 	return (suffix == 'l' ? cmp_r2r_l(eip) : cmp_r2r_w(eip));
 }
 
+/*
 make_helper(sub_r2r_l){
 	ModR_M m;
 	int temp;
@@ -201,6 +236,7 @@ make_helper(sub_r2r_l){
 	}
 	else return 0;//inv
 }
+*/
 
 make_helper(sub_r2m_l){
 	ModR_M m;

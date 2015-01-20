@@ -31,7 +31,12 @@ make_helper(imd_l){//imul or idiv
 			print_asm("test" " 0x%x,%%%s", temp, regsl[m.R_M]);
 			return 6;
 		}
-		else if(m.opcode == 3) {
+		else if(m.opcode == 2) {//not
+			reg_l(m.R_M) = ~ reg_l(m.R_M);
+			print_asm("not" " %%%s",regsl[m.R_M]);
+			return 2;
+		}
+		else if(m.opcode == 3) {//neg
 			if(reg_l(m.R_M)) cpu.CF = 1;
 			else cpu.CF = 0;
 			reg_l(m.R_M) = - reg_l(m.R_M);

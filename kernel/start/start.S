@@ -53,6 +53,7 @@ start_cond:
 
 # Set up a stack for C code.
 	movl $0, %ebp
+//	movl $(0x4000000), %esp
 	movl $(128 << 20), %esp
 	jmp init				# never return
 
