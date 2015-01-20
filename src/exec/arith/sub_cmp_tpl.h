@@ -17,6 +17,15 @@ make_helper(concat(cmp_add_,SUFFIX)) {
 			print_asm("add" " $0x%x,%%%s",sec,REG_NAME(m.R_M));
 			return 2 + sizeof(DATA_TYPE);
 		}
+		else if(m.opcode == 1) {//or
+			temp = fir | sec;
+			REG(m.R_M) = temp;
+			cpu.CF = 0;
+			cpu.OF = 0;
+			set_rF(temp);
+			print_asm("or" " $0x%x,%%%s",sec,REG_NAME(m.R_M));
+			return 2 + sizeof(DATA_TYPE);
+		}
 		else if(m.opcode == 4) {//and
 			REG(m.R_M) = fir & sec;
 			temp = REG(m.R_M);
@@ -331,7 +340,34 @@ make_helper(sub_r2m_l){
 	}
 	else return 0;//inv
 }
+*/
 
+make_helper(concat(sub_rm2r_,SUFFIX)) {
+   ModR_M m;
+   DATA_TYPE fir, sec, temp;
+   m.val = instr_fetch(eip + 1, 1);
+   fir = REG(m.reg);
+   if(m.mod == 3) {
+	   sec = REG(m.R_M);
+	   temp = fir - sec;
+	   REG(m.reg) = temp;
+	   set_6F(sec,fir,temp,0);
+	   print_asm("sub" " %%%s,%%%s",REG_NAME(m.R_M),REG_NAME(m.reg));
+	   return 2;
+   }
+   else {
+	   swaddr_t addr;
+	   int len = read_ModR_M(eip + 1, &addr);
+	   sec = MEM_R(addr);
+	   temp = fir - sec;
+	   REG(m.reg) = temp;
+	   set_6F(sec,fir,temp,0);
+	   print_asm("sub" " %s,%%%s",ModR_M_asm,REG_NAME(m.reg));
+	   return len + 1;
+   }
+}
+
+/*
 make_helper(sbb_r2r_l){
 	ModR_M m;
 	m.val = instr_fetch(eip+1,1);

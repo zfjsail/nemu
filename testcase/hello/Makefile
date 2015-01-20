@@ -15,4 +15,4 @@ $(OBJS): % : %.o
 	objdump -d $@ > $@.txt
 
 clean:
-	-rm $(OBJS) $(SRCS:.c=.o) $(SRCS:.c=.txt) $(SRCS:.c=.d) 2> /dev/null
+	-rm $(OBJS) $(SRCS:.c=.o) $(SRCS:.c=.txt) 2> /dev/null

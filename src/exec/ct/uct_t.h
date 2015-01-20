@@ -24,17 +24,22 @@ make_helper(concat(uct_nr_,SUFFIX)){
 	  else return 0;//inv
 	}
 	else{
+		swaddr_t addr;
+		int len = read_ModR_M(eip + 1,&addr);
+		addr = MEM_R(addr);
 		if(m.opcode == 2){
 			cpu.esp -= 4;
-			swaddr_t addr;
-			int len = read_ModR_M(eip + 1,&addr);
 			MEM_W(cpu.esp,cpu.eip + len + 1);//I think
-			addr = MEM_R(addr);
 //			addr = MEM_R(addr + 0x800000);
 //			cpu.eip = MEM_R(addr) - len - 1;
 			cpu.eip = addr - len - 1;
 
 			print_asm("call" " *%s",ModR_M_asm);
+			return len + 1;
+		}
+		else if(m.opcode == 4) {//jmp *
+			cpu.eip = addr - len - 1;
+			print_asm("jmp" " *%s",ModR_M_asm);
 			return len + 1;
 		}
 		else return 0;//inv

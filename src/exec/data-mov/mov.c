@@ -42,6 +42,7 @@ make_helper(mov_moffs2a_v) {
 	return (suffix == 'l' ? mov_moffs2a_l(eip) : mov_moffs2a_w(eip));
 }
 
+/*
 make_helper(mov_s_bl){
 	ModR_M mm;
 	mm.val = instr_fetch(eip+2,1);
@@ -51,6 +52,11 @@ make_helper(mov_s_bl){
 		return 3;
 	}
 	else return 0;//inv
+}
+*/
+
+make_helper(mov_rm2r_sbv) {
+	return (suffix == 'l' ? mov_rm2r_sbl(eip) : mov_rm2r_sbw(eip));
 }
 
 make_helper(mov_zb_v){
@@ -106,4 +112,12 @@ make_helper(cmove_rm2r_v) {
 
 make_helper(cmova_rm2r_v) {
 	return (suffix == 'l' ? cmova_rm2r_l(eip) : cmova_rm2r_w(eip));
+}
+
+make_helper(cmovs_rm2r_v) {
+	return (suffix == 'l' ? cmovs_rm2r_l(eip) : cmovs_rm2r_w(eip));
+}
+
+make_helper(cmovge_rm2r_v) {
+	return (suffix == 'l' ? cmovge_rm2r_l(eip) : cmovge_rm2r_w(eip));
 }

@@ -2,6 +2,7 @@
 #include "cpu/modrm.h"
 #include "cpu/reg.h"
 
+/*
 make_helper(imd_l){//imul or idiv
 	ModR_M m;
 	int temp;
@@ -62,3 +63,4 @@ make_helper(imd_l){//imul or idiv
 	}
 	else return 0;//inv
 }
+*/

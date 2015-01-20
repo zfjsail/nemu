@@ -139,6 +139,7 @@ make_helper(cmp_r2r_l){
 }
 */
 
+/*
 make_helper(cmp_i2m_b){
 	ModR_M m;
 	char temp;
@@ -185,6 +186,8 @@ make_helper(cmp_i2m_b){
 	}
 	else return 0;//inv
 }
+*/
+
 /*
 make_helper(cmp_r2r_l){
 	ModR_M m;
@@ -202,8 +205,8 @@ make_helper(cmp_r2r_l){
 }
 */
 
-make_helper(sub_r2rm_v) {
-	return (suffix == 'l' ? sub_r2rm_l(eip) : sub_r2rm_w(eip));
+make_helper(sub_rm2r_v) {
+	return (suffix == 'l' ? sub_rm2r_l(eip) : sub_rm2r_w(eip));
 }
 
 make_helper(cmp_rm2r_v) {
@@ -238,6 +241,7 @@ make_helper(sub_r2r_l){
 }
 */
 
+/*
 make_helper(sub_r2m_l){
 	ModR_M m;
 	int temp;
@@ -257,6 +261,11 @@ make_helper(sub_r2m_l){
 		return 3;
 	}
 	else return 0;//inv
+}
+*/
+
+make_helper(sub_r2rm_v) {
+	return (suffix == 'l' ? sub_r2rm_l(eip) : sub_r2rm_w(eip));
 }
 
 make_helper(sbb_r2r_l){
@@ -282,5 +291,11 @@ make_helper(dec_r_v){
 }
 
 make_helper(cmp_a2i_v) {
-	return (suffix == 'l' ? cmp_a2i_l(eip) : cmp_a2i_w(eip));
+	switch(suffix) {
+		case 'l' : return cmp_a2i_l(eip); break;
+		case 'w' : return cmp_a2i_w(eip); break;
+		case 'b' : return cmp_a2i_b(eip); break;
+		default : return 0;
+	}
+//	return (suffix == 'l' ? cmp_a2i_l(eip) : cmp_a2i_w(eip));
 }
