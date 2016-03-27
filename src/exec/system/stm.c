@@ -58,7 +58,7 @@ make_helper(intx) {
 	swaddr_write(cpu.esp,2,cpu.sreg[1]);
     /* push %eip */
 	cpu.esp -= 4;
-	swaddr_write(cpu.esp,4,cpu.eip);
+	swaddr_write(cpu.esp,4,cpu.eip + 1);
 
 	cpu.IF = 0;
 	cpu.TF = 0;
@@ -80,5 +80,5 @@ make_helper(iret) {
 	cpu.esp += 4;
 
 	print_asm("iret");
-	return 2;//really ? int $0x80 len
+	return 1;//really ? int $0x80 len
 }
